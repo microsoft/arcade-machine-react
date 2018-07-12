@@ -11,7 +11,7 @@
     "target": "es6",
     "outDir": "dist",
     "lib": ["es6", "dom"],
-    "types": ["jest", "winrt-uwp"],
+    "types": ["mocha", "winrt-uwp"],
     "moduleResolution": "node",
     "typeRoots": [
         "node_modules/@types"
