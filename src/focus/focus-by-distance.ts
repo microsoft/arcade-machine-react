@@ -1,4 +1,4 @@
-import { Direction, isHorizontal } from '../model';
+import { Button, isHorizontal } from '../model';
 
 /**
  * PotentialElement is a FocusStrategy which uses element positions in the DOM
@@ -14,7 +14,7 @@ class PotentialElement {
     this.rect = this.el.getBoundingClientRect();
   }
 
-  public calcPercentInShadow(refRect: ClientRect, dir: Direction) {
+  public calcPercentInShadow(refRect: ClientRect, dir: Button) {
     if (isHorizontal(dir)) {
       this.percentInShadow =
         Math.min(this.rect.bottom, refRect.bottom) - Math.max(this.rect.top, refRect.top);
@@ -24,18 +24,18 @@ class PotentialElement {
     }
   }
 
-  public calcPrimaryDistance(refRect: ClientRect, dir: Direction) {
+  public calcPrimaryDistance(refRect: ClientRect, dir: Button) {
     switch (dir) {
-      case Direction.Left:
+      case Button.Left:
         this.primaryDistance = refRect.left - this.rect.right;
         break;
-      case Direction.Right:
+      case Button.Right:
         this.primaryDistance = this.rect.left - refRect.right;
         break;
-      case Direction.Up:
+      case Button.Up:
         this.primaryDistance = refRect.top - this.rect.bottom;
         break;
-      case Direction.Down:
+      case Button.Down:
         this.primaryDistance = this.rect.top - refRect.bottom;
         break;
       default:
@@ -43,7 +43,7 @@ class PotentialElement {
     }
   }
 
-  public calcSecondaryDistance(refRect: ClientRect, dir: Direction) {
+  public calcSecondaryDistance(refRect: ClientRect, dir: Button) {
     if (isHorizontal(dir)) {
       const refCenter = refRect.top + refRect.height / 2;
       const isAbove = this.rect.bottom < refCenter;
@@ -63,7 +63,7 @@ export class ElementFinder {
   private shortlisted: PotentialElement[];
 
   constructor(
-    private readonly dir: Direction,
+    private readonly dir: Button,
     private readonly refRect: ClientRect,
     candidates: HTMLElement[],
     private readonly prevEl?: HTMLElement,
@@ -156,13 +156,13 @@ export class ElementFinder {
   private getElementsInDirection() {
     return this.shortlisted.filter(el => {
       switch (this.dir) {
-        case Direction.Left:
+        case Button.Left:
           return el.rect.right <= this.refRect.left;
-        case Direction.Right:
+        case Button.Right:
           return el.rect.left >= this.refRect.right;
-        case Direction.Up:
+        case Button.Up:
           return el.rect.bottom <= this.refRect.top;
-        case Direction.Down:
+        case Button.Down:
           return el.rect.top >= this.refRect.bottom;
         default:
           throw new Error(`Invalid direction ${this.dir}`);

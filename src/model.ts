@@ -3,7 +3,7 @@ import { ArcEvent } from './arc-event';
 /**
  * Direction is an enum of possible gamepad events which can fire.
  */
-export const enum Direction {
+export const enum Button {
   Submit = 0,
   Back = 1,
   X = 2,
@@ -23,52 +23,60 @@ export const enum Direction {
 /**
  * The set of left/right/up/down directional buttons.
  */
-export const directionalButtons: ReadonlySet<Direction> = new Set([
-  Direction.Left,
-  Direction.Right,
-  Direction.Up,
-  Direction.Down,
+export const directionalButtons: ReadonlySet<Button> = new Set([
+  Button.Left,
+  Button.Right,
+  Button.Up,
+  Button.Down,
 ]);
 
 /**
  * The set of gamepad buttons that aren't left/right/up/down focuses.
  */
-export const nonDirectionalButtons: ReadonlySet<Direction> = new Set([
-  Direction.Submit,
-  Direction.Back,
-  Direction.X,
-  Direction.Y,
-  Direction.TabLeft,
-  Direction.TabRight,
-  Direction.TabUp,
-  Direction.TabDown,
-  Direction.View,
-  Direction.Menu,
+export const nonDirectionalButtons: ReadonlySet<Button> = new Set([
+  Button.Submit,
+  Button.Back,
+  Button.X,
+  Button.Y,
+  Button.TabLeft,
+  Button.TabRight,
+  Button.TabUp,
+  Button.TabDown,
+  Button.View,
+  Button.Menu,
+]);
+
+/**
+ * The set of all button codes.
+ */
+export const buttons: ReadonlySet<Button> = new Set([
+  ...nonDirectionalButtons,
+  ...directionalButtons,
 ]);
 
 /**
  * Returns if the direction is left or right.
  */
-export function isHorizontal(direction: Direction) {
-  return direction === Direction.Left || direction === Direction.Right;
+export function isHorizontal(direction: Button) {
+  return direction === Button.Left || direction === Button.Right;
 }
 
 /**
  * Returns if the direction is up or down.
  */
-export function isVertical(direction: Direction) {
-  return direction === Direction.Up || direction === Direction.Down;
+export function isVertical(direction: Button) {
+  return direction === Button.Up || direction === Button.Down;
 }
 
 /**
  * Returns whether the button press is directional.
  */
-export function isDirectional(direction: Direction) {
+export function isDirectional(direction: Button) {
   return (
-    direction === Direction.Up ||
-    direction === Direction.Down ||
-    direction === Direction.Left ||
-    direction === Direction.Right
+    direction === Button.Up ||
+    direction === Button.Down ||
+    direction === Button.Left ||
+    direction === Button.Right
   );
 }
 
@@ -113,11 +121,6 @@ export interface IArcHandler {
    * below this component.
    */
   readonly arcFocusDown?: HTMLElement | string;
-
-  /**
-   * If focused, the element transfers focus to its children if true
-   */
-  readonly arcFocusInside?: boolean;
 
   /**
    * Called with an IArcEvent focus is about

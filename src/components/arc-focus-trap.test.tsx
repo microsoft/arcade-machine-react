@@ -3,7 +3,7 @@ import * as React from 'react';
 
 import { ArcEvent } from '../arc-event';
 import { ArcContext } from '../internal-types';
-import { Direction } from '../model';
+import { Button } from '../model';
 import { StateContainer } from '../state/state-container';
 import { FocusTrap, IFocusTrapProps } from './arc-focus-trap';
 
@@ -60,7 +60,7 @@ describe('ArcFocusTrap', () => {
     const { contents, record } = render();
     const event = new ArcEvent({
       directive: undefined,
-      event: Direction.Down,
+      event: Button.Down,
       next: document.body,
       target: null,
     });
@@ -74,7 +74,7 @@ describe('ArcFocusTrap', () => {
     const { contents, record, element } = render();
     const event = new ArcEvent({
       directive: undefined,
-      event: Direction.Down,
+      event: Button.Down,
       next: element.querySelector('.c'),
       target: null,
     });
