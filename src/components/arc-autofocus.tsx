@@ -15,31 +15,35 @@ import { Composable, renderComposed } from '../internal-types';
  * @example
  * const box = ArcAutoFocus(<div class="myBox" tabIndex={0}>)
  */
+class AutoFocus extends React.PureComponent<{ selector?: string }> {
+  public componentDidMount() {
+    const node = ReactDOM.findDOMNode(this);
+    if (!(node instanceof Element)) {
+      return;
+    }
+    let focusTarget: Element | null = null;
+    if (this.props.selector) {
+      focusTarget = node.querySelector(this.props.selector);
+    } else if (node.children.length) {
+      focusTarget = node.children[0];
+    } else {
+      focusTarget = node;
+    }
+
+    if (focusTarget) {
+      (focusTarget as HTMLElement).focus();
+    }
+  }
+
+  public render() {
+    return this.props.children;
+  }
+}
+
+/**
+ * HOC for the AutoFocus component.
+ */
 export const ArcAutoFocus = <P extends {} = {}>(
   Composed: Composable<P>,
   selector?: string,
-) =>
-  class ArcAutoFocusComponent extends React.PureComponent<P> {
-    public componentDidMount() {
-      const node = ReactDOM.findDOMNode(this);
-      if (!(node instanceof Element)) {
-        return;
-      }
-      let focusTarget: Element | null = null;
-      if (selector) {
-        focusTarget = node.querySelector(selector);
-      } else if (node.children.length) {
-        focusTarget = node.children[0];
-      } else {
-        focusTarget = node;
-      }
-
-      if (focusTarget) {
-        (focusTarget as HTMLElement).focus();
-      }
-    }
-
-    public render() {
-      return renderComposed(Composed, this.props);
-    }
-  };
+) => (props: P) => <AutoFocus selector={selector}>{renderComposed(Composed, props)}</AutoFocus>;

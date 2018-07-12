@@ -39,3 +39,21 @@ export type Composable<P> = React.ReactElement<any> | React.ComponentType<P>;
  */
 export const renderComposed = <P>(composed: Composable<P>, props: P) =>
   typeof composed === 'function' ? createElement(composed, props) : composed;
+
+/**
+ * Returns the focusable element in the container, optionally filtering
+ * to the given target.
+ */
+export function findFocusable(
+  container: HTMLElement,
+  target?: string | HTMLElement,
+): HTMLElement | null {
+  if (typeof target === 'string') {
+    return container.querySelector(target) as HTMLElement;
+  }
+  if (target) {
+    return target;
+  }
+
+  return container.querySelector('[tabIndex]');
+}
