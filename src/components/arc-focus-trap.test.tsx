@@ -1,4 +1,4 @@
-import { mount } from 'enzyme';
+import { expect } from 'chai';
 import * as React from 'react';
 
 import { ArcEvent } from '../arc-event';
@@ -6,6 +6,7 @@ import { ArcContext } from '../internal-types';
 import { Button } from '../model';
 import { StateContainer } from '../state/state-container';
 import { FocusTrap, IFocusTrapProps } from './arc-focus-trap';
+import { mountToDOM } from './util.test';
 
 const delay = () => new Promise(resolve => setTimeout(resolve));
 
@@ -38,12 +39,12 @@ describe('ArcFocusTrap', () => {
 
   const render = (props?: Partial<IFocusTrapProps>, showTrapDefault: boolean = true) => {
     const state = new StateContainer();
-    const contents = mount(
+    const contents = mountToDOM(
       <TestComponent
         state={state}
         {...props}
         showTrapDefault={showTrapDefault}
-      />,
+      />
     );
     const element = contents.getDOMNode().querySelector('.arc-focus-trap') as HTMLElement;
     const record = state.find(element)!;
@@ -57,7 +58,7 @@ describe('ArcFocusTrap', () => {
   };
 
   it('prevents navigating outside of the focus trap', () => {
-    const { contents, record } = render();
+    const { record } = render();
     const event = new ArcEvent({
       directive: undefined,
       event: Button.Down,
@@ -66,12 +67,11 @@ describe('ArcFocusTrap', () => {
     });
 
     record.onOutgoing!(event);
-    expect(event.defaultPrevented).toBe(true);
-    contents.unmount();
+    expect(event.defaultPrevented).to.equal(true);
   });
 
   it('allows focusing within the trap', () => {
-    const { contents, record, element } = render();
+    const { record, element } = render();
     const event = new ArcEvent({
       directive: undefined,
       event: Button.Down,
@@ -80,22 +80,19 @@ describe('ArcFocusTrap', () => {
     });
 
     record.onOutgoing!(event);
-    expect(event.defaultPrevented).toBe(false);
-    contents.unmount();
+    expect(event.defaultPrevented).to.equal(false);
   });
 
   it('focuses the first element by default', async () => {
-    const { contents } = render();
+    render();
     await delay();
-    expect(document.activeElement.className).toBe('b');
-    contents.unmount();
+    expect(document.activeElement.className).to.equal('b');
   });
 
   it('passes focus to an overridden selector', async () => {
-    const { contents } = render({ focusIn: '.c' });
+    render({ focusIn: '.c' });
     await delay();
-    expect(document.activeElement.className).toBe('c');
-    contents.unmount();
+    expect(document.activeElement.className).to.equal('c');
   });
 
   it('passes focus to the previously focused element when destroying', async () => {
@@ -103,20 +100,18 @@ describe('ArcFocusTrap', () => {
     (contents.getDOMNode().querySelector('.a') as HTMLElement).focus();
     contents.find('.a').simulate('click');
     await delay();
-    expect(document.activeElement.className).toBe('b');
+    expect(document.activeElement.className).to.equal('b');
     contents.find('.b').simulate('click');
-    expect(document.activeElement.className).toBe('a');
-    contents.unmount();
+    expect(document.activeElement.className).to.equal('a');
   });
 
   it('allows a custom focus out element', async () => {
     const { contents } = render({ focusOut: document.body }, false);
     contents.find('.a').simulate('click');
     await delay();
-    expect(document.activeElement.className).toBe('b');
+    expect(document.activeElement.className).to.equal('b');
     contents.find('.b').simulate('click');
-    expect(document.activeElement).toBe(document.body);
-    contents.unmount();
+    expect(document.activeElement).to.equal(document.body);
   });
 
   it('respects any immediate autofocused elements', async () => {
@@ -124,7 +119,6 @@ describe('ArcFocusTrap', () => {
     contents.find('.a').simulate('click');
     (contents.getDOMNode().querySelector('.c') as HTMLElement).focus();
     await delay();
-    expect(document.activeElement.className).toBe('c');
-    contents.unmount();
+    expect(document.activeElement.className).to.equal('c');
   });
 });
