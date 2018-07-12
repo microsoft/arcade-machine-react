@@ -9,6 +9,15 @@ import {
 import { StateContainer } from '../state/state-container';
 
 /**
+ * Properties passed to the FocusTrap.
+ */
+export interface IFocusTrapProps {
+  children: React.ReactNode;
+  focusIn?: HTMLElement | string;
+  focusOut?: HTMLElement | string;
+}
+
+/**
  * The ArcFocusTrap prevents focus from leaving the given area of the DOM,
  * until the trap is destroyed. When initially mounted, it will move
  * focus to the first focusable element inside of it, or the focusIn element,
@@ -25,11 +34,7 @@ import { StateContainer } from '../state/state-container';
  *   <MyContent />
  * </FocusTrap>
  */
-export class FocusTrap extends React.PureComponent<{
-  children: React.ReactNode;
-  focusIn?: HTMLElement | string;
-  focusOut?: HTMLElement | string;
-}> {
+export class FocusTrap extends React.PureComponent<IFocusTrapProps> {
   private containerRef = React.createRef<HTMLDivElement>();
   private previouslyFocusedElement!: HTMLElement;
   private stateContainer!: StateContainer;

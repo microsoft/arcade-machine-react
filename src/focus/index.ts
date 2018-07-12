@@ -1,10 +1,10 @@
-import { Direction, IArcHandler } from '../model';
+import { Button, IArcHandler } from '../model';
 
 export interface IFocusOptions {
   /**
    * The direction the focus is going.
    */
-  direction: Direction;
+  direction: Button;
 
   /**
    * The last element that was focuse.
@@ -17,5 +17,5 @@ export interface IFocusOptions {
  * within the focus service.
  */
 export interface IFocusStrategy {
-  findNextFocus(direction: Direction, arcHandler: IArcHandler): HTMLElement | null;
+  findNextFocus(direction: Button, arcHandler: IArcHandler): HTMLElement | null;
 }

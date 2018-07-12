@@ -1,5 +1,5 @@
 import { ArcEvent } from '../arc-event';
-import { Direction } from '../model';
+import { Button } from '../model';
 import { StateContainer } from './state-container';
 
 describe('StateContainer', () => {
@@ -8,10 +8,10 @@ describe('StateContainer', () => {
     const element = document.createElement('div');
     expect(store.find(element)).toBeUndefined();
 
-    store.add(0, { element, arcFocusInside: true });
+    store.add(0, { element, excludeThis: true });
     const result = store.find(element);
     expect(result).toBeDefined();
-    expect(result!.arcFocusInside).toBe(true);
+    expect(result!.excludeThis).toBe(true);
 
     store.remove(0, element);
     expect(store.find(element)).toBeUndefined();
@@ -78,7 +78,7 @@ describe('StateContainer', () => {
     store.add(2, { element, onOutgoing: ev => ev.stopPropagation() });
     store.add(3, { element, onOutgoing: () => calls.push(3) });
     store.find(element)!.onOutgoing!(
-      new ArcEvent({ next: null, event: Direction.Submit, target: null }),
+      new ArcEvent({ next: null, event: Button.Submit, target: null }),
     );
 
     expect(calls).toEqual([0, 1]);

@@ -1,27 +1,27 @@
-import { Direction, IArcHandler } from '../model';
-import { IFocusStrategy } from './index';
+import { IFocusStrategy } from '.';
+import { Button, IArcHandler } from '../model';
 
 export class FocusByRegistry implements IFocusStrategy {
-  public findNextFocus(direction: Direction, arcHandler: IArcHandler) {
+  public findNextFocus(direction: Button, arcHandler: IArcHandler) {
     const selectedEl = arcHandler;
     if (selectedEl) {
       switch (direction) {
-        case Direction.Left:
+        case Button.Left:
           if (selectedEl.arcFocusLeft) {
             return this.getElement(selectedEl.arcFocusLeft);
           }
           break;
-        case Direction.Right:
+        case Button.Right:
           if (selectedEl.arcFocusRight) {
             return this.getElement(selectedEl.arcFocusRight);
           }
           break;
-        case Direction.Up:
+        case Button.Up:
           if (selectedEl.arcFocusUp) {
             return this.getElement(selectedEl.arcFocusUp);
           }
           break;
-        case Direction.Down:
+        case Button.Down:
           if (selectedEl.arcFocusDown) {
             return this.getElement(selectedEl.arcFocusDown);
           }
