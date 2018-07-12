@@ -1,6 +1,7 @@
-import { fromEvent } from '../../node_modules/rxjs';
-import { filter, map } from '../../node_modules/rxjs/operators';
-import { keys } from '../../node_modules/uwp-keycodes';
+import { fromEvent } from 'rxjs';
+import { filter, map } from 'rxjs/operators';
+import { keys } from 'uwp-keycodes';
+
 import { Button } from '../model';
 import { IInputMethod } from './input-method';
 
