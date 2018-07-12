@@ -324,23 +324,7 @@ export class FocusService {
     refRect: ClientRect,
     ignore: Set<HTMLElement>,
   ): HTMLElement | null {
-    let nextFocusableEl = this.findNextFocusable(direction, root, refRect, ignore);
-
-    if (!nextFocusableEl) {
-      return null;
-    }
-
-    const directive = this.registry.find(nextFocusableEl);
-    if (directive && directive.arcFocusInside) {
-      const elementInside = this.getFocusableElement(direction, nextFocusableEl, refRect, ignore);
-
-      // get focusable again if no focusable elements inside the current element
-      nextFocusableEl =
-        elementInside ||
-        this.getFocusableElement(direction, root, refRect, ignore.add(nextFocusableEl));
-    }
-
-    return nextFocusableEl;
+    return this.findNextFocusable(direction, root, refRect, ignore);
   }
 
   private findNextFocusable(
