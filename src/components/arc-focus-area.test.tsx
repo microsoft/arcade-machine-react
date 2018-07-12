@@ -3,7 +3,7 @@ import * as React from 'react';
 
 import { ArcEvent } from '../arc-event';
 import { ArcContext } from '../internal-types';
-import { Direction } from '../model';
+import { Button } from '../model';
 import { StateContainer } from '../state/state-container';
 import { FocusArea } from './arc-focus-area';
 
@@ -39,7 +39,7 @@ describe('ArcFocusArea', () => {
 
     const event = new ArcEvent({
       directive: undefined,
-      event: Direction.Down,
+      event: Button.Down,
       next: element,
       target: null,
     });
@@ -55,7 +55,7 @@ describe('ArcFocusArea', () => {
 
     const event = new ArcEvent({
       directive: undefined,
-      event: Direction.Down,
+      event: Button.Down,
       next: element,
       target: null,
     });
@@ -71,7 +71,7 @@ describe('ArcFocusArea', () => {
 
     const event = new ArcEvent({
       directive: undefined,
-      event: Direction.Down,
+      event: Button.Down,
       next: element.querySelector('.c'),
       target: element.querySelector('.b'),
     });
