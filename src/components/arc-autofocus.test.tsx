@@ -1,19 +1,20 @@
-import { mount } from 'enzyme';
+import { expect } from 'chai';
 import * as React from 'react';
 
 import { ArcAutoFocus } from './arc-autofocus';
+import { mountToDOM } from './util.test';
 
 const NormalInput = (props: { className: string }) => <input className={props.className}/>;
 const FocusedInput = ArcAutoFocus(NormalInput);
 
 describe('ArcAutoFocus', () => {
-  it('focuses the first html element', () => {
-    const cmp = mount(<div>
+  it('focuses the first html element', async () => {
+    const cmp = mountToDOM(<div>
       <NormalInput className="not-focused" />
       <FocusedInput className="focused" />
     </div>);
 
-    expect(document.activeElement.className).toEqual('focused');
+    expect(document.activeElement.className).to.deep.equal('focused');
     cmp.unmount();
   });
 
@@ -25,8 +26,8 @@ describe('ArcAutoFocus', () => {
       </div>,
       '.focused'
     );
-    const cmp = mount(<div><Fixture /></div>);
-    expect(document.activeElement.className).toEqual('focused');
+    const cmp = mountToDOM(<div><Fixture /></div>);
+    expect(document.activeElement.className).to.deep.equal('focused');
     cmp.unmount();
   });
 });
