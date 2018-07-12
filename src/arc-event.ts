@@ -1,4 +1,4 @@
-import { Direction, IArcHandler } from './model';
+import { Button, IArcHandler } from './model';
 
 /**
  * ArcEvents are fired on an element when an input occurs. They include
@@ -15,7 +15,7 @@ export class ArcEvent {
   /**
    * The direction we're navigating.
    */
-  public readonly event: Direction;
+  public readonly event: Button;
 
   /**
    * The currently focused element we're navigating from.
@@ -44,7 +44,7 @@ export class ArcEvent {
   constructor(options: {
     directive?: IArcHandler;
     next: HTMLElement | null;
-    event: Direction;
+    event: Button;
     target: HTMLElement | null;
   }) {
     this.directive = options.directive;

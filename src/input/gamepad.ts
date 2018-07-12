@@ -1,11 +1,11 @@
-import { Direction } from '../model';
+import { Button } from '../model';
 
 export interface IGamepadWrapper {
   /**
    * Map from a direction to a function that takes in a time (now)
    * and returns whether that direction fired
    */
-  readonly events: Map<Direction, (now: number) => boolean>;
+  readonly events: Map<Button, (now: number) => boolean>;
 
   /**
    * The actual Gamepad object that can be updated/accessed;

@@ -1,12 +1,13 @@
 import { Subscription } from 'rxjs';
 
 import { ArcEvent } from './arc-event';
-import { ElementFinder } from './focus-strategies/focus-by-distance';
-import { FocusByRegistry } from './focus-strategies/focus-by-registry';
-import { Direction, isDirectional, isHorizontal } from './model';
+import { getCommonAncestor, isNodeAttached, roundRect } from './focus/dom-utils';
+import { ElementFinder } from './focus/focus-by-distance';
+import { FocusByRegistry } from './focus/focus-by-registry';
+import { isForForm } from './focus/is-for-form';
+import { Button, isDirectional, isHorizontal } from './model';
 import { StateContainer } from './state/state-container';
 
-const defaultFocusRoot = document.body;
 // These factors can be tweaked to adjust which elements are favored by the focus algorithm
 const scoringConstants = Object.freeze({
   fastSearchMaxPointChecks: 30,
@@ -14,11 +15,6 @@ const scoringConstants = Object.freeze({
   fastSearchPointDistance: 10,
   maxFastSearchSize: 0.5,
 });
-
-interface IFocusState {
-  root: HTMLElement;
-  focusedElem: HTMLElement | null;
-}
 
 interface IReducedClientRect {
   top: number;
@@ -40,45 +36,6 @@ const defaultRect: ClientRect = Object.freeze({
   width: 0,
 });
 
-function roundRect(rect: HTMLElement | ClientRect): ClientRect {
-  if (rect instanceof HTMLElement) {
-    rect = rect.getBoundingClientRect();
-  }
-
-  // There's rounding here because floating points make certain math not work.
-  return {
-    bottom: Math.floor(rect.top + rect.height),
-    height: Math.floor(rect.height),
-    left: Math.floor(rect.left),
-    right: Math.floor(rect.left + rect.width),
-    top: Math.floor(rect.top),
-    width: Math.floor(rect.width),
-  };
-}
-
-/**
- * Returns the common ancestor in the DOM of two nodes. From:
- * http://stackoverflow.com/a/7648545
- */
-function getCommonAncestor(
-  nodeA: HTMLElement | null,
-  nodeB: HTMLElement | null,
-): HTMLElement | null {
-  if (nodeA === null || nodeB === null) {
-    return null;
-  }
-
-  const mask = 0x10;
-  while (nodeA != null && nodeA.parentElement) {
-    nodeA = nodeA.parentElement;
-    // tslint:disable-next-line
-    if ((nodeA.compareDocumentPosition(nodeB) & mask) === mask) {
-      return nodeA;
-    }
-  }
-  return null;
-}
-
 /**
  * Interpolation with quadratic speed up and slow down.
  */
@@ -92,16 +49,6 @@ function quad(start: number, end: number, progress: number): number {
   }
 }
 
-/**
- * Returns whether the target DOM node is a child of the root.
- */
-function isNodeAttached(node: HTMLElement | null, root: HTMLElement | null) {
-  if (!node || !root) {
-    return false;
-  }
-  return root.contains(node);
-}
-
 export class FocusService {
   public enableRaycast = false;
   public focusedClass = 'arc--selected-direct';
@@ -111,11 +58,6 @@ export class FocusService {
    * This can be Infinity to disable the animation, or null to disable scrolling.
    */
   public scrollSpeed: number | null = 1000;
-  public focusRoot: HTMLElement = defaultFocusRoot;
-  // The currently selected element.
-  public selected: HTMLElement | null = null;
-  // Focus root, the service operates below here.
-  private root: HTMLElement | null = null;
   // Subscription to focus update events.
   private registrySubscription?: Subscription;
 
@@ -123,63 +65,14 @@ export class FocusService {
   // The client bounding rect when we first selected the element, cached
   // so that we can reuse it if the element gets detached.
   private referenceRect: ClientRect = defaultRect;
-  private focusStack: IFocusState[] = [];
   private focusByRegistry = new FocusByRegistry();
 
-  constructor(private registry: StateContainer) {}
-
-  public trapFocus(newRootElem: HTMLElement) {
-    this.focusStack.push({
-      focusedElem: this.selected,
-      root: this.focusRoot,
-    });
-    this.focusRoot = newRootElem;
+  private get selected() {
+    return document.activeElement as HTMLElement;
   }
 
-  public releaseFocus(releaseElem?: HTMLElement, scrollSpeed: number | null = this.scrollSpeed) {
-    if (releaseElem) {
-      if (releaseElem === this.focusRoot) {
-        this.releaseFocus(undefined, scrollSpeed);
-      }
-      return;
-    }
-
-    const lastFocusState = this.focusStack.pop();
-    if (lastFocusState && lastFocusState.focusedElem) {
-      this.focusRoot = lastFocusState.root;
-      this.selectNode(lastFocusState.focusedElem, scrollSpeed);
-    } else {
-      throw new Error(
-        'No more focus traps to release. Make sure you call trapFocus before using releaseFocus',
-      );
-    }
-  }
-
-  /**
-   * Useful for resetting all focus traps e.g. on page navigation
-   */
-  public clearAllTraps() {
-    this.focusStack.length = 0;
-    this.focusRoot = defaultFocusRoot;
-  }
-
-  /**
-   * Sets the root element to use for focusing.
-   */
-  public setRoot(root: HTMLElement, scrollSpeed: number | null = this.scrollSpeed) {
-    if (this.registrySubscription) {
-      this.registrySubscription.unsubscribe();
-    }
-
-    this.root = root;
-
-    if (!this.selected) {
-      return;
-    }
-
-    if (!root.contains(this.selected)) {
-      this.setDefaultFocus(scrollSpeed);
-    }
+  constructor(private readonly registry: StateContainer, private readonly root: HTMLElement) {
+    this.setDefaultFocus();
   }
 
   /**
@@ -195,7 +88,7 @@ export class FocusService {
    * Wrapper around moveFocus to dispatch arcselectingnode event
    */
   public selectNode(next: HTMLElement, scrollSpeed: number | null = this.scrollSpeed) {
-    if (!this.focusRoot.contains(next)) {
+    if (!this.root.contains(next)) {
       return;
     }
 
@@ -226,7 +119,6 @@ export class FocusService {
 
     this.triggerOnFocusHandlers(next);
     this.switchFocusClass(this.selected, next, this.focusedClass);
-    this.selected = next;
     this.referenceRect = next.getBoundingClientRect();
     this.rescroll(next, scrollSpeed, this.root);
 
@@ -248,23 +140,30 @@ export class FocusService {
     this.registrySubscription.unsubscribe();
   }
 
-  public createArcEvent(direction: Direction): ArcEvent {
+  /**
+   * sendButton sends a directional input through the focus service.
+   */
+  public sendButton(direction: Button): boolean {
+    const ev = this.createArcEvent(direction);
+    if (!isForForm(direction, this.selected) && !this.bubble(ev)) {
+      return this.defaultFires(ev);
+    }
+
+    return false;
+  }
+
+  public createArcEvent(direction: Button): ArcEvent {
     const directive = this.selected ? this.registry.find(this.selected) : undefined;
 
     let nextElem: HTMLElement | null = null;
     if (isDirectional(direction)) {
       let refRect = this.referenceRect;
 
-      if (this.selected && this.focusRoot.contains(this.selected)) {
+      if (this.selected && this.root.contains(this.selected)) {
         refRect = this.selected.getBoundingClientRect();
       }
 
-      nextElem = this.getFocusableElement(
-        direction,
-        this.focusRoot,
-        refRect,
-        new Set<HTMLElement>(),
-      );
+      nextElem = this.getFocusableElement(direction, this.root, refRect, new Set<HTMLElement>());
     }
 
     return new ArcEvent({
@@ -308,7 +207,7 @@ export class FocusService {
     if (directional && ev.next !== null) {
       this.selectNode(ev.next, scrollSpeed);
       return true;
-    } else if (ev.event === Direction.Submit) {
+    } else if (ev.event === Button.Submit) {
       if (this.selected) {
         this.selected.click();
         return true;
@@ -319,7 +218,7 @@ export class FocusService {
   }
 
   private getFocusableElement(
-    direction: Direction,
+    direction: Button,
     root: HTMLElement,
     refRect: ClientRect,
     ignore: Set<HTMLElement>,
@@ -328,7 +227,7 @@ export class FocusService {
   }
 
   private findNextFocusable(
-    direction: Direction,
+    direction: Button,
     root: HTMLElement,
     refRect: ClientRect,
     ignore: Set<HTMLElement>,
@@ -341,7 +240,7 @@ export class FocusService {
     }
 
     if (!nextElem && this.enableRaycast) {
-      nextElem = this.findNextFocusByRaycast(direction, this.focusRoot, this.referenceRect);
+      nextElem = this.findNextFocusByRaycast(direction, this.root, this.referenceRect);
     }
 
     if (!nextElem) {
@@ -372,7 +271,7 @@ export class FocusService {
     // Find the common ancestor of the next and currently selected element.
     // Trigger focus changes on every element that we touch.
     const common = getCommonAncestor(next, this.selected);
-    let el = this.selected;
+    let el: HTMLElement | null = this.selected;
     while (el !== common && el !== null) {
       this.triggerFocusChange(el, null);
       el = el.parentElement;
@@ -602,7 +501,7 @@ export class FocusService {
    * Reset the focus if arcade-machine wanders out of root
    */
   private setDefaultFocus(scrollSpeed: number | null = this.scrollSpeed) {
-    const focusableElems = this.focusRoot.querySelectorAll('[tabIndex]');
+    const focusableElems = this.root.querySelectorAll('[tabIndex]');
 
     // tslint:disable-next-line
     for (let i = 0; i < focusableElems.length; i += 1) {
@@ -625,11 +524,7 @@ export class FocusService {
    * findNextFocusByRaycast is a speedy implementation of focus searching
    * that uses a raycast to determine the next best element.
    */
-  private findNextFocusByRaycast(
-    direction: Direction,
-    root: HTMLElement,
-    referenceRect: ClientRect,
-  ) {
+  private findNextFocusByRaycast(direction: Button, root: HTMLElement, referenceRect: ClientRect) {
     if (!this.selected) {
       this.setDefaultFocus();
     }
@@ -655,22 +550,22 @@ export class FocusService {
     let seekX = 0;
     let seekY = 0;
     switch (direction) {
-      case Direction.Left:
+      case Button.Left:
         baseX = referenceRect.left - 1;
         baseY = referenceRect.top + referenceRect.height / 2;
         seekX = -1;
         break;
-      case Direction.Right:
+      case Button.Right:
         baseX = referenceRect.left + referenceRect.width + 1;
         baseY = referenceRect.top + referenceRect.height / 2;
         seekX = 1;
         break;
-      case Direction.Up:
+      case Button.Up:
         baseX = referenceRect.left + referenceRect.width / 2;
         baseY = referenceRect.top - 1;
         seekY = -1;
         break;
-      case Direction.Down:
+      case Button.Down:
         baseX = referenceRect.left + referenceRect.width / 2;
         baseY = referenceRect.top + referenceRect.height + 1;
         seekY = 1;
