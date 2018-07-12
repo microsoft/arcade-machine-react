@@ -74,6 +74,13 @@ export class StateContainer {
   }
 
   /**
+   * Returns whether the given element exists in the arcade-machine state.
+   */
+  public has(el: HTMLElement): boolean {
+    return this.arcs.has(el);
+  }
+
+  /**
    * Returns whether there are any elements with deep exclusions in the registry.
    */
   public hasExcludedDeepElements(): boolean {

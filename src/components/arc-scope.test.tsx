@@ -32,6 +32,7 @@ describe('ArcScope', () => {
       arcFocusDown: '#foo',
       element: targetEl,
     });
+    contents.unmount();
   });
 
   it('removes state when unmounting the component', () => {
@@ -51,5 +52,6 @@ describe('ArcScope', () => {
     });
 
     expect((state as any).arcs.get(targetEl).records).toHaveLength(1);
+    contents.unmount();
   });
 });

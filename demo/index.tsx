@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { render } from 'react-dom';
-import { ArcRoot, ArcAutoFocus, ArcUp, ArcDown } from '../src';
+import { ArcRoot, ArcAutoFocus, ArcUp, ArcDown, FocusArea, ArcFocusTrap, FocusTrap } from '../src';
 
 const AutofocusBox = ArcAutoFocus(
   class extends React.PureComponent<{ onClick: () => void }> {
@@ -24,6 +24,50 @@ const UpDownOverride1 = ArcUp('#override3', ArcDown('#override2', UpDownOverride
 const UpDownOverride2 = ArcUp('#override1', ArcDown('#override3', UpDownOverrideBox));
 const UpDownOverride3 = ArcUp('#override2', ArcDown('#override1', UpDownOverrideBox));
 
+const Dialog = ArcFocusTrap(
+  class extends React.PureComponent<{ onClose: () => void }, { showTrap: boolean }> {
+    private showTrap = () => this.setState({ showTrap: true });
+    private hideTrap = () => this.setState({ showTrap: false });
+
+    constructor(props: { onClose: () => void }) {
+      super(props);
+      this.state = { showTrap: false };
+    }
+
+    public render() {
+      return (
+        <div className="area dialog">
+          <div>
+            <button tabIndex={0}>Button 1</button>
+            <button tabIndex={0}>Button 2</button>
+          </div>
+          <div>
+            <button tabIndex={0} onClick={this.showTrap}>
+              Show nested focus trap
+            </button>
+          </div>
+          {this.state.showTrap ? (
+            <FocusTrap>
+              <div style={{ border: '1px solid red' }}>
+                <button tabIndex={0}>Button 1</button>
+                <button tabIndex={0}>Button 2</button>
+                <button onClick={this.hideTrap} tabIndex={0}>
+                  Hide nested trap
+                </button>
+              </div>
+            </FocusTrap>
+          ) : null}
+          <div>
+            <button onClick={this.props.onClose} tabIndex={0}>
+              Close
+            </button>
+          </div>
+        </div>
+      );
+    }
+  },
+);
+
 const MyApp = ArcRoot(
   class extends React.Component<
     {},
@@ -38,6 +82,14 @@ const MyApp = ArcRoot(
     private readonly toggleAFBox = () => {
       this.setState({ ticker: 0, showAFBox: false });
       setTimeout(() => this.setState({ ...this.state, showAFBox: true }), 1000);
+    };
+
+    private readonly onDialogOpen = () => {
+      this.setState({ isDialogVisible: true });
+    };
+
+    private readonly onDialogClose = () => {
+      this.setState({ isDialogVisible: false });
     };
 
     constructor(props: {}) {
@@ -77,11 +129,7 @@ const MyApp = ArcRoot(
           </div>
           <h1>Focus Inside</h1>
           Transfer focus to elements inside me
-          <div
-            className="area"
-            tabIndex={0}
-            style={{ display: 'flex', justifyContent: 'space-evenly' }}
-          >
+          <div className="area" style={{ display: 'flex', justifyContent: 'space-evenly' }}>
             <div
               style={{
                 display: 'flex',
@@ -91,20 +139,26 @@ const MyApp = ArcRoot(
               }}
             >
               With arc-focus-inside
-              <div id="focus-inside1" className="area">
-                <div className="square" tabIndex={0} />
-                <div className="square" tabIndex={0} />
-                <div className="square" tabIndex={0} />
-              </div>
-              <div id="focus-inside1" className="area" tabIndex={0}>
-                <div className="square" tabIndex={0} />
-                <div className="square" tabIndex={0} style={{ marginLeft: '100px' }} />
-              </div>
-              <div id="focus-inside1" className="area">
-                <div className="square" tabIndex={0} />
-                <div className="square" tabIndex={0} />
-                <div className="square" tabIndex={0} />
-              </div>
+              <FocusArea>
+                <div id="focus-inside1" className="area">
+                  <div className="square" tabIndex={0} />
+                  <div className="square" tabIndex={0} />
+                  <div className="square" tabIndex={0} />
+                </div>
+              </FocusArea>
+              <FocusArea>
+                <div id="focus-inside1" className="area">
+                  <div className="square" tabIndex={0} />
+                  <div className="square" tabIndex={0} style={{ marginLeft: '100px' }} />
+                </div>
+              </FocusArea>
+              <FocusArea>
+                <div id="focus-inside1" className="area">
+                  <div className="square" tabIndex={0} />
+                  <div className="square" tabIndex={0} />
+                  <div className="square" tabIndex={0} />
+                </div>
+              </FocusArea>
             </div>
             <div
               style={{
@@ -175,6 +229,87 @@ const MyApp = ArcRoot(
               </div>
             </div>
           </div>
+          <h1>Focus Child Elements Only</h1>
+          <button tabIndex={0} onClick={this.onDialogOpen}>
+            Open Dialog
+          </button>
+          <h1>History</h1>
+          <h2>Prefer last focused element</h2>
+          <div className="area" style={{ display: 'flex', alignItems: 'center' }}>
+            <div
+              className="box"
+              tabIndex={0}
+              style={{ display: 'inline-block', marginLeft: 50, width: 150, height: 150 }}
+            />
+            <div id="focus-inside1" style={{ display: 'inline-block', margin: 50 }}>
+              <div className="box" tabIndex={0} style={{ width: 50, height: 50 }} />
+              <div className="box" tabIndex={0} style={{ width: 50, height: 50 }} />
+              <div className="box" tabIndex={0} style={{ width: 50, height: 50 }} />
+            </div>
+          </div>
+          <h1>A Form</h1>
+          <div className="area">
+            <form>
+              <div>
+                <input tabIndex={0} placeholder="Username" />
+              </div>
+              <div>
+                <input tabIndex={0} placeholder="Password" type="password" />
+              </div>
+              <div>
+                <textarea tabIndex={0} />
+              </div>
+              <div>
+                <button tabIndex={0}>Submit</button>
+              </div>
+            </form>
+          </div>
+          <h1>Adding/Removing Elements</h1>
+          <div className="area">
+            {this.boxes.map((box, i) => (
+              <div className="box-wrapper" key={i}>
+                {(i + this.state.ticker) % 2 === 0 ? (
+                  <div className="box" tabIndex={0}>
+                    {box}
+                  </div>
+                ) : null}
+              </div>
+            ))}
+          </div>
+          <h1>A Grid</h1>
+          <div className="area">
+            <div>
+              <div className="square" tabIndex={0} />
+            </div>
+            <div>
+              <div className="square" tabIndex={0} />
+              <div className="square" tabIndex={0} />
+            </div>
+            <div>
+              <div className="square" tabIndex={0} />
+              <div className="square" tabIndex={0} />
+              <div className="square" tabIndex={0} />
+            </div>
+            <div>
+              <div className="square" tabIndex={0} />
+              <div className="square" tabIndex={0} />
+              <div className="square" tabIndex={0} />
+              <div className="square" tabIndex={0} />
+            </div>
+            <div>
+              <div className="square" tabIndex={0} />
+              <div className="square" tabIndex={0} />
+              <div className="square" tabIndex={0} />
+            </div>
+            <div>
+              <div className="square" tabIndex={0} />
+              <div className="square" tabIndex={0} />
+            </div>
+            <div>
+              <div className="square" tabIndex={0} />
+            </div>
+          </div>
+          {this.state.isDialogVisible ? <Dialog onClose={this.onDialogClose} /> : null}
         </div>
       );
     }
