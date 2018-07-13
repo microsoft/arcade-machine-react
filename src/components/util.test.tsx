@@ -1,5 +1,7 @@
 import { mount, ReactWrapper } from 'enzyme';
 import * as React from 'react';
+import { FocusContext } from '../focus';
+import { Button } from '../model';
 
 const container = document.createElement('div');
 document.body.appendChild(container);
@@ -22,3 +24,16 @@ afterEach(() => {
   mountings.forEach(m => m.unmount());
   mountings = [];
 });
+
+/**
+ * Focus context for use in tests.
+ */
+export class NoopFocusContext extends FocusContext {
+  constructor() {
+    super(container, Button.Down, [], {
+      activeElement: document.body,
+      directive: undefined,
+      referenceRect: document.body.getBoundingClientRect(),
+    });
+  }
+}

@@ -14,7 +14,7 @@ export class GamepadInput implements IInputMethod {
    * Detects any connected gamepads and watches for new ones to start
    * polling them. This is the entry point for gamepad input handling.
    */
-  public readonly observe = new Observable<Button>(subscriber => {
+  public readonly observe = new Observable<{ button: Button }>(subscriber => {
     if (this.attemptToActivateUwpKeyboardMapping()) {
       return () => (navigator.gamepadInputEmulation = 'mouse');
     }
@@ -29,8 +29,8 @@ export class GamepadInput implements IInputMethod {
 
     const poll = (now: number) => {
       const button = this.pollGamepad(now, gamepads);
-      if (button) {
-        subscriber.next(button);
+      if (button !== null) {
+        subscriber.next({ button });
       }
       raf = requestAnimationFrame(poll);
     };

@@ -1,4 +1,5 @@
 import { ArcEvent } from './arc-event';
+import { ArcFocusEvent } from './arc-focus-event';
 
 /**
  * Direction is an enum of possible gamepad events which can fire.
@@ -87,18 +88,6 @@ export interface IArcHandler {
   readonly element: HTMLElement;
 
   /**
-   * A method which can return "false" if this handler should not be
-   * included as focusable.
-   */
-  readonly excludeThis?: boolean;
-
-  /**
-   * A method which can return "false" if this handler and all its children
-   * should not be included as focusable.
-   */
-  readonly exclude?: boolean;
-
-  /**
    * Element or selector which should be focused when navigating to
    * the left of this component.
    */
@@ -126,16 +115,18 @@ export interface IArcHandler {
    * Called with an IArcEvent focus is about
    * to leave this element or one of its children.
    */
-  onOutgoing?(ev: ArcEvent): void;
+  onOutgoing?(ev: ArcFocusEvent): void;
 
   /**
    * Called with an IArcEvent focus is about
    * to enter this element or one of its children.
    */
-  onIncoming?(ev: ArcEvent): void;
+  onIncoming?(ev: ArcFocusEvent): void;
 
   /**
-   * Triggers a focus change event.
+   * Triggers when a button is pressed in the element or one of its
+   * children. This will fire before the onOutgoing handler, for directional
+   * events.
    */
-  onFocus?(el: HTMLElement | null): void;
+  onButton?(ev: ArcEvent): void;
 }

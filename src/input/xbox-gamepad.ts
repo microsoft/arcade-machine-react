@@ -55,9 +55,8 @@ export class XboxGamepadWrapper implements IGamepadWrapper {
     this.events.set(Button.Down, now => down.attempt(now));
 
     for (const button of nonDirectionalButtons) {
-      this.events.set(button, () =>
-        new FiredDebouncer(() => this.pad.buttons[button].pressed).attempt(),
-      );
+      const debouncer = new FiredDebouncer(() => this.pad.buttons[button].pressed);
+      this.events.set(button, () => debouncer.attempt());
     }
   }
 
