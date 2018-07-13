@@ -1,10 +1,10 @@
 import { ArcEvent } from '../arc-event';
 import { IArcHandler } from '../model';
 
-const functionCalls: Array<'onOutgoing' | 'onIncoming' | 'onFocus'> = [
+const functionCalls: Array<'onOutgoing' | 'onIncoming' | 'onButton'> = [
   'onOutgoing',
   'onIncoming',
-  'onFocus',
+  'onButton',
 ];
 
 /**
@@ -46,7 +46,7 @@ export class ElementStateRecord {
     this.recreateResolved();
   }
 
-  private callForEach(method: 'onOutgoing' | 'onIncoming' | 'onFocus') {
+  private callForEach(method: 'onOutgoing' | 'onIncoming' | 'onButton') {
     return (arg: HTMLElement | ArcEvent | null) => {
       for (const record of this.records) {
         const fn = record.handler[method];

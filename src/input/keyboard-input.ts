@@ -57,15 +57,17 @@ export class KeyboardInput implements IInputMethod {
     [keys.GamepadMenu, Button.Menu],
   ]);
 
-  public readonly observe = fromEvent<KeyboardEvent>(window, 'keydown').pipe<Button>(
-    map(ev => {
-      const direction = KeyboardInput.codeDirectionMap.get(ev.keyCode);
-      if (direction === undefined) {
+  public readonly observe = fromEvent<KeyboardEvent>(window, 'keydown').pipe<{
+    button: Button;
+    event: Event;
+  }>(
+    map(event => {
+      const button = KeyboardInput.codeDirectionMap.get(event.keyCode);
+      if (button === undefined) {
         return undefined;
       }
 
-      ev.preventDefault();
-      return direction;
+      return { button, event };
     }),
     filter(ev => ev !== undefined),
   );

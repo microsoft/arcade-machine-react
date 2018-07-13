@@ -2,7 +2,8 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
 import { ArcEvent } from '../arc-event';
-import { ArcContext, Composable, requireContext } from '../internal-types';
+import { ArcFocusEvent } from '../arc-focus-event';
+import { ArcContext, Composable, renderComposed, requireContext } from '../internal-types';
 import { IArcHandler } from '../model';
 import { StateContainer } from '../state/state-container';
 
@@ -58,7 +59,7 @@ export const ArcScope = <P extends {} = {}>(
      */
     private readonly withContext = requireContext(({ state }) => {
       this.stateContainer = state;
-      return typeof Composed === 'function' ? <Composed {...this.props} /> : Composed;
+      return renderComposed(Composed, this.props);
     });
 
     public componentDidMount() {
@@ -108,25 +109,12 @@ export const ArcRight = <P extends {} = {}>(
   target: HTMLElement | string,
   composed: Composable<P>,
 ) => ArcScope(composed, { arcFocusRight: target });
-
-/**
- * Excludes the composed element from being focusable
- */
-export const ArcExcludeThis = <P extends {} = {}>(composed: Composable<P>) =>
-  ArcScope(composed, { excludeThis: true });
-
-/**
- * Excludes the composed element and all children from being focusable
- */
-export const ArcExcludeDeep = <P extends {} = {}>(composed: Composable<P>) =>
-  ArcScope(composed, { exclude: true });
-
 /**
  * Called with an IArcEvent focus is about
  * to leave this element or one of its children.
  */
 export const ArcOnOutgoing = <P extends {} = {}>(
-  handler: (ev: ArcEvent) => void,
+  handler: (ev: ArcFocusEvent) => void,
   composed: Composable<P>,
 ) => ArcScope(composed, { onOutgoing: handler });
 
@@ -135,14 +123,14 @@ export const ArcOnOutgoing = <P extends {} = {}>(
  * to enter this element or one of its children.
  */
 export const ArcOnIncoming = <P extends {} = {}>(
-  handler: (ev: ArcEvent) => void,
+  handler: (ev: ArcFocusEvent) => void,
   composed: Composable<P>,
 ) => ArcScope(composed, { onIncoming: handler });
 
 /**
  * Triggers a focus change event.
  */
-export const ArcOnFocus = <P extends {} = {}>(
-  handler: (el: HTMLElement | null) => void,
+export const ArcOnButton = <P extends {} = {}>(
+  handler: (ev: ArcEvent) => void,
   composed: Composable<P>,
-) => ArcScope(composed, { onFocus: handler });
+) => ArcScope(composed, { onButton: handler });

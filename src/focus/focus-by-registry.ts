@@ -1,42 +1,42 @@
-import { IFocusStrategy } from '.';
-import { Button, IArcHandler } from '../model';
+import { IFocusOptions, IFocusStrategy } from '.';
+import { findElement } from '../internal-types';
+import { Button } from '../model';
 
+/**
+ * FocusByRegistry is an IFocusStrategy which looks at handlers attached
+ * to the directive and, if they have a configured focus override in
+ * the given direction, return the relevant element.
+ */
 export class FocusByRegistry implements IFocusStrategy {
-  public findNextFocus(direction: Button, arcHandler: IArcHandler) {
-    const selectedEl = arcHandler;
-    if (selectedEl) {
-      switch (direction) {
-        case Button.Left:
-          if (selectedEl.arcFocusLeft) {
-            return this.getElement(selectedEl.arcFocusLeft);
-          }
-          break;
-        case Button.Right:
-          if (selectedEl.arcFocusRight) {
-            return this.getElement(selectedEl.arcFocusRight);
-          }
-          break;
-        case Button.Up:
-          if (selectedEl.arcFocusUp) {
-            return this.getElement(selectedEl.arcFocusUp);
-          }
-          break;
-        case Button.Down:
-          if (selectedEl.arcFocusDown) {
-            return this.getElement(selectedEl.arcFocusDown);
-          }
-          break;
-        default:
-      }
+  public findNextFocus({ direction, directive }: IFocusOptions) {
+    if (!directive) {
+      return null;
     }
+
+    switch (direction) {
+      case Button.Left:
+        if (directive.arcFocusLeft) {
+          return findElement(document.body, directive.arcFocusLeft);
+        }
+        break;
+      case Button.Right:
+        if (directive.arcFocusRight) {
+          return findElement(document.body, directive.arcFocusRight);
+        }
+        break;
+      case Button.Up:
+        if (directive.arcFocusUp) {
+          return findElement(document.body, directive.arcFocusUp);
+        }
+        break;
+      case Button.Down:
+        if (directive.arcFocusDown) {
+          return findElement(document.body, directive.arcFocusDown);
+        }
+        break;
+      default:
+    }
+
     return null;
-  }
-
-  private getElement(el: HTMLElement | string) {
-    if (typeof el === 'string') {
-      return document.querySelector(el) as HTMLElement;
-    }
-
-    return el;
   }
 }

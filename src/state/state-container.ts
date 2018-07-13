@@ -14,29 +14,14 @@ export class StateContainer {
   private readonly arcs = new Map<HTMLElement, ElementStateRecord>();
 
   /**
-   * Ref counter for the number of components that use the exclude()
-   * option. This results in more expensive lookup operations, so we avoid
-   * doing it so if there's no one requesting exclusion.
-   */
-  private excludedDeepCount = 0;
-
-  /**
    * Stores a directive into the registry.
    */
   public add(key: any, arc: IArcHandler) {
     const record = this.arcs.get(arc.element);
-    if (!record) {
+    if (record) {
+      record.add(key, arc);
+    } else {
       this.arcs.set(arc.element, new ElementStateRecord(key, arc));
-      if (arc.exclude) {
-        this.excludedDeepCount++;
-      }
-      return;
-    }
-
-    const hadExclusion = record.resolved!.exclude;
-    record.add(key, arc);
-    if (record.resolved!.exclude && !hadExclusion) {
-      this.excludedDeepCount++;
     }
   }
 
@@ -49,15 +34,10 @@ export class StateContainer {
       return;
     }
 
-    const hadExclusion = record.resolved!.exclude;
     record.remove(key);
-    const hasExclusion = record.resolved && record.resolved.exclude;
+
     if (!record.resolved) {
       this.arcs.delete(el);
-    }
-
-    if (hadExclusion && !hasExclusion) {
-      this.excludedDeepCount--;
     }
   }
 
@@ -78,12 +58,5 @@ export class StateContainer {
    */
   public has(el: HTMLElement): boolean {
     return this.arcs.has(el);
-  }
-
-  /**
-   * Returns whether there are any elements with deep exclusions in the registry.
-   */
-  public hasExcludedDeepElements(): boolean {
-    return this.excludedDeepCount > 0;
   }
 }
