@@ -1,12 +1,12 @@
 import { expect } from 'chai';
 import * as React from 'react';
 
-import { ArcEvent } from '../arc-event';
+import { ArcFocusEvent } from '../arc-focus-event';
 import { ArcContext } from '../internal-types';
 import { Button } from '../model';
 import { StateContainer } from '../state/state-container';
 import { FocusArea } from './arc-focus-area';
-import { mountToDOM } from './util.test';
+import { mountToDOM, NoopFocusContext } from './util.test';
 
 describe('ArcFocusArea', () => {
   const render = (focusIn?: string) => {
@@ -38,11 +38,12 @@ describe('ArcFocusArea', () => {
   it('focuses the first focusable element by default', () => {
     const { contents, record, element } = render();
 
-    const event = new ArcEvent({
+    const event = new ArcFocusEvent({
+      context: new NoopFocusContext(),
       directive: undefined,
       event: Button.Down,
       next: element,
-      target: null,
+      target: document.body,
     });
 
     record.onIncoming!(event);
@@ -54,11 +55,12 @@ describe('ArcFocusArea', () => {
   it('overrides focusable by a query', () => {
     const { contents, record, element } = render('.c');
 
-    const event = new ArcEvent({
+    const event = new ArcFocusEvent({
+      context: new NoopFocusContext(),
       directive: undefined,
       event: Button.Down,
       next: element,
-      target: null,
+      target: document.body,
     });
 
     record.onIncoming!(event);
@@ -70,11 +72,12 @@ describe('ArcFocusArea', () => {
   it('does not intercept focus events inside the element', () => {
     const { contents, record, element } = render();
 
-    const event = new ArcEvent({
+    const event = new ArcFocusEvent({
+      context: new NoopFocusContext(),
       directive: undefined,
       event: Button.Down,
       next: element.querySelector('.c'),
-      target: element.querySelector('.b'),
+      target: element.querySelector('.b') as HTMLElement,
     });
 
     record.onIncoming!(event);

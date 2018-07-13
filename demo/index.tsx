@@ -1,3 +1,4 @@
+import { FocusExclude } from '../src/components/arc-exclude';
 import * as React from 'react';
 import { render } from 'react-dom';
 import { ArcRoot, ArcAutoFocus, ArcUp, ArcDown, FocusArea, ArcFocusTrap, FocusTrap } from '../src';
@@ -168,32 +169,27 @@ const MyApp = ArcRoot(
                 alignItems: 'center',
               }}
             >
-              With arc-focus-inside
-              <div id="focus-inside1" className="area">
-                <div className="square" tabIndex={0} />
-                <div className="square" tabIndex={0} />
-                <div className="square" tabIndex={0} />
-              </div>
-              <div
-                id="focus-inside1"
-                className="area"
-                style={{ minHeight: '85px', width: '100%' }}
-                tabIndex={0}
-              >
-                Empty element with arc-focus-inside
-                <div
-                  className="area"
-                  style={{ minHeight: '45px', width: '80%', margin: '15px' }}
-                  tabIndex={0}
-                >
-                  Empty element with arc-focus-inside
+              With focus excluded
+              <FocusExclude>
+                <div id="focus-inside1" className="area">
+                  <div className="square" tabIndex={0} />
+                  <div className="square" tabIndex={0} />
+                  <div className="square" tabIndex={0} />
                 </div>
-              </div>
-              <div id="focus-inside1" className="area">
-                <div className="square" tabIndex={0} />
-                <div className="square" tabIndex={0} />
-                <div className="square" tabIndex={0} />
-              </div>
+              </FocusExclude>
+              <FocusExclude>
+                <div id="focus-inside1" className="area">
+                  <div className="square" tabIndex={0} />
+                  <div className="square" tabIndex={0} style={{ marginLeft: '100px' }} />
+                </div>
+              </FocusExclude>
+              <FocusExclude>
+                <div id="focus-inside1" className="area">
+                  <div className="square" tabIndex={0} />
+                  <div className="square" tabIndex={0} />
+                  <div className="square" tabIndex={0} />
+                </div>
+              </FocusExclude>
             </div>
             <div
               style={{

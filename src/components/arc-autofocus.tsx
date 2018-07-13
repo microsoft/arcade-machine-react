@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { Composable, renderComposed } from '../internal-types';
+import { Composable, findElement, renderComposed } from '../internal-types';
 
 /**
  * Component that autofocuses whatever is contained inside it. By default,
@@ -15,15 +15,15 @@ import { Composable, renderComposed } from '../internal-types';
  * @example
  * const box = ArcAutoFocus(<div class="myBox" tabIndex={0}>)
  */
-class AutoFocus extends React.PureComponent<{ selector?: string }> {
+class AutoFocus extends React.PureComponent<{ selector?: string | HTMLElement }> {
   public componentDidMount() {
     const node = ReactDOM.findDOMNode(this);
-    if (!(node instanceof Element)) {
+    if (!(node instanceof HTMLElement)) {
       return;
     }
     let focusTarget: Element | null = null;
     if (this.props.selector) {
-      focusTarget = node.querySelector(this.props.selector);
+      focusTarget = findElement(node, this.props.selector);
     } else if (node.children.length) {
       focusTarget = node.children[0];
     } else {
@@ -45,5 +45,5 @@ class AutoFocus extends React.PureComponent<{ selector?: string }> {
  */
 export const ArcAutoFocus = <P extends {} = {}>(
   Composed: Composable<P>,
-  selector?: string,
+  selector?: string | HTMLElement,
 ) => (props: P) => <AutoFocus selector={selector}>{renderComposed(Composed, props)}</AutoFocus>;
