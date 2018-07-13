@@ -1,4 +1,6 @@
+import { IFocusOptions, IFocusStrategy } from '.';
 import { Button, isHorizontal } from '../model';
+import { isFocusable } from './dom-utils';
 
 /**
  * PotentialElement is a FocusStrategy which uses element positions in the DOM
@@ -55,6 +57,17 @@ class PotentialElement {
 
       this.secondaryDistance = isLeft ? refCenter - this.rect.right : this.rect.left - refCenter;
     }
+  }
+}
+
+// tslint:disable-next-line
+export class FocusByDistance implements IFocusStrategy {
+  public findNextFocus({ referenceRect, direction, ignore, root, activeElement }: IFocusOptions) {
+    const focusableElems = Array.from(root.querySelectorAll<HTMLElement>('[tabIndex]')).filter(
+      el => !ignore.has(el) && isFocusable(el),
+    );
+
+    return new ElementFinder(direction, referenceRect, focusableElems, activeElement).find();
   }
 }
 

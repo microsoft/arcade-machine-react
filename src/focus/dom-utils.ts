@@ -15,34 +15,47 @@ export function roundRect(rect: HTMLElement | ClientRect): ClientRect {
 }
 
 /**
- * Returns the common ancestor in the DOM of two nodes. From:
- * http://stackoverflow.com/a/7648545
- */
-export function getCommonAncestor(
-  nodeA: HTMLElement | null,
-  nodeB: HTMLElement | null,
-): HTMLElement | null {
-  if (nodeA === null || nodeB === null) {
-    return null;
-  }
-
-  const mask = 0x10;
-  while (nodeA != null && nodeA.parentElement) {
-    nodeA = nodeA.parentElement;
-    // tslint:disable-next-line
-    if ((nodeA.compareDocumentPosition(nodeB) & mask) === mask) {
-      return nodeA;
-    }
-  }
-  return null;
-}
-
-/**
  * Returns whether the target DOM node is a child of the root.
  */
-export function isNodeAttached(node: HTMLElement | null, root: HTMLElement | null) {
+export function isNodeAttached(node: HTMLElement | null, root: HTMLElement | null): boolean {
   if (!node || !root) {
     return false;
   }
   return root.contains(node);
+}
+
+/**
+ * Returns whether the provided element is visible.
+ */
+export function isVisible(el: HTMLElement | null): boolean {
+  if (!el) {
+    return false;
+  }
+
+  const style = window.getComputedStyle(el);
+  if (style.display === 'none' || style.visibility === 'hidden') {
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Returns if the element can receive focus.
+ */
+export function isFocusable(el: HTMLElement): boolean {
+  if (el === document.activeElement) {
+    return false;
+  }
+  // to prevent navigating to parent container elements with arc-focus-inside
+  if (document.activeElement !== document.body && document.activeElement.contains(el)) {
+    return false;
+  }
+
+  // Dev note: el.tabindex is not consistent across browsers
+  const tabIndex = el.getAttribute('tabIndex');
+  if (!tabIndex || +tabIndex < 0) {
+    return false;
+  }
+
+  return isVisible(el);
 }
