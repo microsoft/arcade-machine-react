@@ -20,15 +20,7 @@ export class ArcEvent {
   /**
    * The currently focused element we're navigating from.
    */
-  public readonly target: HTMLElement | null;
-
-  /**
-   * `next` is the element that we'll select next, on directional navigation,
-   * unless the element is cancelled. This *is* settable and you can use it
-   * to modify the focus target. This will be set to `null` on non-directional
-   * navigation or if we can't find a subsequent element to select.
-   */
-  public next: HTMLElement | null;
+  public readonly target: HTMLElement;
 
   /**
    * Whether the default action (focus change) of this event
@@ -41,16 +33,10 @@ export class ArcEvent {
    */
   protected propogationStopped = false;
 
-  constructor(options: {
-    directive?: IArcHandler;
-    next: HTMLElement | null;
-    event: Button;
-    target: HTMLElement | null;
-  }) {
+  constructor(options: { directive?: IArcHandler; event: Button; target: HTMLElement }) {
     this.directive = options.directive;
     this.event = options.event;
     this.target = options.target;
-    this.next = options.next;
   }
 
   /**

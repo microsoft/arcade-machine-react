@@ -47,7 +47,8 @@ export function isForForm(direction: Button, selected: HTMLElement | null): bool
     type !== 'search' &&
     type !== 'url' &&
     type !== 'tel' &&
-    type !== 'password'
+    type !== 'password' &&
+    type !== 'textarea'
   ) {
     return false;
   }

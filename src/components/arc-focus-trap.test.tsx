@@ -1,12 +1,12 @@
 import { expect } from 'chai';
 import * as React from 'react';
 
-import { ArcEvent } from '../arc-event';
+import { ArcFocusEvent } from '../arc-focus-event';
 import { ArcContext } from '../internal-types';
 import { Button } from '../model';
 import { StateContainer } from '../state/state-container';
 import { FocusTrap, IFocusTrapProps } from './arc-focus-trap';
-import { mountToDOM } from './util.test';
+import { mountToDOM, NoopFocusContext } from './util.test';
 
 const delay = () => new Promise(resolve => setTimeout(resolve));
 
@@ -59,11 +59,12 @@ describe('ArcFocusTrap', () => {
 
   it('prevents navigating outside of the focus trap', () => {
     const { record } = render();
-    const event = new ArcEvent({
+    const event = new ArcFocusEvent({
+      context: new NoopFocusContext(),
       directive: undefined,
       event: Button.Down,
       next: document.body,
-      target: null,
+      target: document.body,
     });
 
     record.onOutgoing!(event);
@@ -72,11 +73,12 @@ describe('ArcFocusTrap', () => {
 
   it('allows focusing within the trap', () => {
     const { record, element } = render();
-    const event = new ArcEvent({
+    const event = new ArcFocusEvent({
+      context: new NoopFocusContext(),
       directive: undefined,
       event: Button.Down,
-      next: element.querySelector('.c'),
-      target: null,
+      next: element.querySelector('.c') as HTMLElement,
+      target: document.body,
     });
 
     record.onOutgoing!(event);

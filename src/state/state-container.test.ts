@@ -10,25 +10,13 @@ describe('StateContainer', () => {
     const element = document.createElement('div');
     expect(store.find(element)).to.be.undefined;
 
-    store.add(0, { element, excludeThis: true });
+    store.add(0, { element, arcFocusDown: '.foo' });
     const result = store.find(element);
     expect(result).not.to.be.undefined;
-    expect(result!.excludeThis).to.equal(true);
+    expect(result!.arcFocusDown).to.equal('.foo');
 
     store.remove(0, element);
     expect(store.find(element)).to.be.undefined;
-  });
-
-  it('refcounts deep checks', () => {
-    const store = new StateContainer();
-    const element = document.createElement('div');
-    expect(store.hasExcludedDeepElements()).to.equal(false);
-
-    store.add(0, { element, exclude: true });
-    expect(store.hasExcludedDeepElements()).to.equal(true);
-
-    store.remove(0, element);
-    expect(store.hasExcludedDeepElements()).to.equal(false);
   });
 
   it('merges in state', () => {
@@ -53,39 +41,16 @@ describe('StateContainer', () => {
     expect(store.find(element)).to.be.undefined;
   });
 
-  it('refcounts deep checks when merging in state', () => {
-    const store = new StateContainer();
-    const element = document.createElement('div');
-
-    store.add(1, { element, exclude: false });
-    expect(store.hasExcludedDeepElements()).to.equal(false);
-
-    store.add(2, { element, exclude: true });
-    expect(store.hasExcludedDeepElements()).to.equal(true);
-
-    store.add(3, { element, exclude: true });
-    expect(store.hasExcludedDeepElements()).to.equal(true);
-
-    store.remove(2, element);
-    expect(store.hasExcludedDeepElements()).to.equal(true);
-    store.remove(3, element);
-    expect(store.hasExcludedDeepElements()).to.equal(false);
-    store.remove(1, element);
-    expect(store.hasExcludedDeepElements()).to.equal(false);
-  });
-
   it('combines function calls', () => {
     const calls: number[] = [];
     const store = new StateContainer();
     const element = document.createElement('div');
 
-    store.add(0, { element, onOutgoing: () => calls.push(0) });
-    store.add(1, { element, onOutgoing: () => calls.push(1) });
-    store.add(2, { element, onOutgoing: ev => ev.stopPropagation() });
-    store.add(3, { element, onOutgoing: () => calls.push(3) });
-    store.find(element)!.onOutgoing!(
-      new ArcEvent({ next: null, event: Button.Submit, target: null }),
-    );
+    store.add(0, { element, onButton: () => calls.push(0) });
+    store.add(1, { element, onButton: () => calls.push(1) });
+    store.add(2, { element, onButton: ev => ev.stopPropagation() });
+    store.add(3, { element, onButton: () => calls.push(3) });
+    store.find(element)!.onButton!(new ArcEvent({ event: Button.Submit, target: document.body }));
 
     expect(calls).to.deep.equal([0, 1]);
   });

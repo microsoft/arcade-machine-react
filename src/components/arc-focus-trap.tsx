@@ -2,6 +2,7 @@ import * as React from 'react';
 import {
   ArcContext,
   Composable,
+  findElement,
   findFocusable,
   renderComposed,
   requireContext,
@@ -80,12 +81,9 @@ export class FocusTrap extends React.PureComponent<IFocusTrapProps> {
     this.stateContainer.remove(this, this.containerRef.current!);
 
     if (this.props.focusOut) {
-      const target = typeof this.props.focusOut === 'string'
-        ? document.querySelector(this.props.focusOut)
-        : this.props.focusOut;
-
+      const target = findElement(document.body, this.props.focusOut);
       if (target) {
-        (target as HTMLElement).focus();
+        target.focus();
         return
       }
     }

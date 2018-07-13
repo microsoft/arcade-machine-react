@@ -9,7 +9,7 @@ export interface IInputMethod {
   /**
    * Returns an observable of the user's button presses.
    */
-  readonly observe: Observable<Button>;
+  readonly observe: Observable<{ button: Button; event?: Event }>;
 
   /**
    * Returns whether the input method is supported in the current browser.

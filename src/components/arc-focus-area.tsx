@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ArcContext, Composable, renderComposed, requireContext } from '../internal-types';
+import { ArcContext, Composable, findElement, findFocusable, renderComposed, requireContext } from '../internal-types';
 import { StateContainer } from '../state/state-container';
 
 /**
@@ -58,20 +58,19 @@ export class FocusArea extends React.PureComponent<{
     this.stateContainer.add(this, {
       element,
       onIncoming: ev => {
-        if (ev.target && element.contains(ev.target)) {
+        if (ev.next !== element) {
           return;
         }
 
-        const target = this.props.focusIn || '[tabIndex]';
-        if (typeof target !== 'string') {
-          ev.next = target;
-          return;
+        let target: HTMLElement | null = findElement(element, this.props.focusIn);
+        if (!target && ev.focusContext) {
+          target = ev.focusContext.find(element);
+        }
+        if (!target) {
+          target = findFocusable(element);
         }
 
-        const child = element.querySelector(target);
-        if (child) {
-          ev.next = child as HTMLElement;
-        }
+        ev.next = target || element;
       },
     });
   }

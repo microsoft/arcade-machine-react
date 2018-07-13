@@ -1,7 +1,11 @@
 import * as React from 'react';
 import { ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+
+import { IFocusStrategy } from '../focus';
 import { FocusService } from '../focus-service';
+import { FocusByDistance } from '../focus/focus-by-distance';
+import { FocusByRegistry } from '../focus/focus-by-registry';
 import { InputService } from '../input';
 import { GamepadInput } from '../input/gamepad-input';
 import { IInputMethod } from '../input/input-method';
@@ -22,7 +26,7 @@ import { StateContainer } from '../state/state-container';
  *
  * export default ArcRoot(MyAppContent);
  */
-class Root extends React.PureComponent<{ strategies: IInputMethod[] }> {
+class Root extends React.PureComponent<{ inputs: IInputMethod[]; focus: IFocusStrategy[] }> {
   private stateContainer = new StateContainer();
   private focus!: FocusService;
   private input!: InputService;
@@ -30,10 +34,18 @@ class Root extends React.PureComponent<{ strategies: IInputMethod[] }> {
   private unmounted = new ReplaySubject<void>(1);
 
   public componentDidMount() {
-    const focus = this.focus = new FocusService(this.stateContainer, this.rootRef.current!);
-    const input = this.input = new InputService(this.props.strategies);
+    const focus = (this.focus = new FocusService(
+      this.stateContainer,
+      this.rootRef.current!,
+      this.props.focus,
+    ));
+    const input = (this.input = new InputService(this.props.inputs));
 
-    input.events.pipe(takeUntil(this.unmounted)).subscribe(button => focus.sendButton(button));
+    input.events.pipe(takeUntil(this.unmounted)).subscribe(({ button, event }) => {
+      if (focus.sendButton(button) && event) {
+        event.preventDefault();
+      }
+    });
   }
 
   public componentWillUnmount() {
@@ -54,5 +66,10 @@ class Root extends React.PureComponent<{ strategies: IInputMethod[] }> {
  */
 export const ArcRoot = <P extends {}>(
   Composed: Composable<P>,
-  inputStrategies: IInputMethod[] = [new GamepadInput(), new KeyboardInput()],
-) => (props: P) => <Root strategies={inputStrategies}>{renderComposed(Composed, props)}</Root>;
+  inputs: IInputMethod[] = [new GamepadInput(), new KeyboardInput()],
+  focusStrategies: IFocusStrategy[] = [new FocusByRegistry(), new FocusByDistance()],
+) => (props: P) => (
+  <Root inputs={inputs} focus={focusStrategies}>
+    {renderComposed(Composed, props)}
+  </Root>
+);
