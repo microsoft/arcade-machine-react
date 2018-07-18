@@ -1,7 +1,16 @@
 import { FocusExclude } from '../src/components/arc-exclude';
 import * as React from 'react';
 import { render } from 'react-dom';
-import { ArcRoot, ArcAutoFocus, ArcUp, ArcDown, FocusArea, ArcFocusTrap, FocusTrap } from '../src';
+import {
+  ArcAutoFocus,
+  ArcDown,
+  ArcFocusTrap,
+  ArcOnIncoming,
+  ArcRoot,
+  ArcUp,
+  FocusArea,
+  FocusTrap,
+} from '../src';
 
 const AutofocusBox = ArcAutoFocus(
   class extends React.PureComponent<{ onClick: () => void }> {
@@ -25,8 +34,13 @@ const UpDownOverride1 = ArcUp('#override3', ArcDown('#override2', UpDownOverride
 const UpDownOverride2 = ArcUp('#override1', ArcDown('#override3', UpDownOverrideBox));
 const UpDownOverride3 = ArcUp('#override2', ArcDown('#override1', UpDownOverrideBox));
 
+const ArcShouldNotFocus = ArcOnIncoming(
+  ev => alert(`Unexpected incoming focus in: ${ev.next.parentElement.innerHTML}`),
+  (props: { style?: any }) => <div className="square" tabIndex={0} {...props} />,
+);
+
 const Dialog = ArcFocusTrap(
-  class extends React.PureComponent<{ onClose: () => void }, { showTrap: boolean }> {
+  class extends React.Component<{ onClose: () => void }, { showTrap: boolean }> {
     private showTrap = () => this.setState({ showTrap: true });
     private hideTrap = () => this.setState({ showTrap: false });
 
@@ -303,6 +317,35 @@ const MyApp = ArcRoot(
             </div>
             <div>
               <div className="square" tabIndex={0} />
+            </div>
+          </div>
+          <h1>Hidden Boxes</h1>
+          To the right of each description is an invisible box. These should not be focusable, and
+          will alert if you try to focus them.
+          <div className="area">
+            <div className="visibility-test">
+              <div className="case-name" tabIndex={0}>
+                base case (should focus)
+              </div>
+              <div>
+                <div className="square" tabIndex={0} />
+              </div>
+            </div>
+            <div className="visibility-test">
+              <div className="case-name" tabIndex={0}>
+                display: none
+              </div>
+              <div>
+                <ArcShouldNotFocus style={{ display: 'none' }} />
+              </div>
+            </div>
+            <div className="visibility-test">
+              <div className="case-name" tabIndex={0}>
+                parent display: none
+              </div>
+              <div style={{ display: 'none' }}>
+                <ArcShouldNotFocus />
+              </div>
             </div>
           </div>
           {this.state.isDialogVisible ? <Dialog onClose={this.onDialogClose} /> : null}
