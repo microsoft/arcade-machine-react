@@ -27,16 +27,8 @@ export function isNodeAttached(node: HTMLElement | null, root: HTMLElement | nul
 /**
  * Returns whether the provided element is visible.
  */
-export function isVisible(el: HTMLElement | null): boolean {
-  if (!el) {
-    return false;
-  }
-
-  const style = window.getComputedStyle(el);
-  if (style.display === 'none' || style.visibility === 'hidden') {
-    return false;
-  }
-  return true;
+export function isVisible(element: HTMLElement | null): boolean {
+  return !!element && (element.offsetHeight !== 0 || element.offsetParent !== null);
 }
 
 /**
