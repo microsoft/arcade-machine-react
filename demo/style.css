@@ -78,3 +78,22 @@ textarea:focus {
   display: inline-block;
   margin: 5px;
 }
+
+.visibility-test {
+  display: flex;
+  align-items: center;
+  height: 50px;
+  margin: 16px;
+}
+
+.visibility-test .case-name {
+  display: block;
+  width: 200px;
+  height: 50px;
+  border: 1px solid black;
+  margin: 16px;
+}
+
+.visibility-test .case-name:focus {
+  border-color: red;
+}
