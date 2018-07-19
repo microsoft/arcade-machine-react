@@ -62,12 +62,12 @@ class PotentialElement {
 
 // tslint:disable-next-line
 export class FocusByDistance implements IFocusStrategy {
-  public findNextFocus({ referenceRect, direction, ignore, root, activeElement }: IFocusOptions) {
+  public findNextFocus({ referenceRect, direction, ignore, root, previousElement }: IFocusOptions) {
     const focusableElems = Array.from(root.querySelectorAll<HTMLElement>('[tabIndex]')).filter(
       el => !ignore.has(el) && isFocusable(el),
     );
 
-    return new ElementFinder(direction, referenceRect, focusableElems, activeElement).find();
+    return new ElementFinder(direction, referenceRect, focusableElems, previousElement).find();
   }
 }
 

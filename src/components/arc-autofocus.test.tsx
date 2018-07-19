@@ -1,18 +1,30 @@
 import { expect } from 'chai';
 import * as React from 'react';
 
+import { NativeElementStore } from '../focus/native-element-store';
+import { instance } from '../singleton';
+import { StateContainer } from '../state/state-container';
 import { ArcAutoFocus } from './arc-autofocus';
 import { mountToDOM } from './util.test';
 
-const NormalInput = (props: { className: string }) => <input className={props.className}/>;
+const NormalInput = (props: { className: string }) => <input className={props.className} />;
 const FocusedInput = ArcAutoFocus(NormalInput);
 
 describe('ArcAutoFocus', () => {
+  beforeEach(() => {
+    instance.setServices({
+      elementStore: new NativeElementStore(),
+      stateContainer: new StateContainer(),
+    });
+  });
+
   it('focuses the first html element', async () => {
-    const cmp = mountToDOM(<div>
-      <NormalInput className="not-focused" />
-      <FocusedInput className="focused" />
-    </div>);
+    const cmp = mountToDOM(
+      <div>
+        <NormalInput className="not-focused" />
+        <FocusedInput className="focused" />
+      </div>,
+    );
 
     expect(document.activeElement.className).to.deep.equal('focused');
     cmp.unmount();
@@ -24,9 +36,13 @@ describe('ArcAutoFocus', () => {
         <NormalInput className="not-focused" />
         <NormalInput className="focused" />,
       </div>,
-      '.focused'
+      '.focused',
     );
-    const cmp = mountToDOM(<div><Fixture /></div>);
+    const cmp = mountToDOM(
+      <div>
+        <Fixture />
+      </div>,
+    );
     expect(document.activeElement.className).to.deep.equal('focused');
     cmp.unmount();
   });
