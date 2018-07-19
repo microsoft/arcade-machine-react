@@ -1,6 +1,7 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { Composable, findElement, renderComposed } from '../internal-types';
+import { instance } from '../singleton';
 
 /**
  * Component that autofocuses whatever is contained inside it. By default,
@@ -31,7 +32,7 @@ class AutoFocus extends React.PureComponent<{ selector?: string | HTMLElement }>
     }
 
     if (focusTarget) {
-      (focusTarget as HTMLElement).focus();
+      instance.getServices().elementStore.element = focusTarget as HTMLElement;
     }
   }
 

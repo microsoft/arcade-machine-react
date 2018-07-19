@@ -2,6 +2,7 @@ import { mount, ReactWrapper } from 'enzyme';
 import * as React from 'react';
 import { FocusContext } from '../focus';
 import { Button } from '../model';
+import { instance } from '../singleton';
 
 const container = document.createElement('div');
 document.body.appendChild(container);
@@ -23,6 +24,7 @@ export function mountToDOM(element: React.ReactElement<any>) {
 afterEach(() => {
   mountings.forEach(m => m.unmount());
   mountings = [];
+  instance.setServices(undefined);
 });
 
 /**

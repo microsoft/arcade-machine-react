@@ -12,9 +12,14 @@ export interface IFocusOptions {
   root: HTMLElement;
 
   /**
-   * The last element that was focused.
+   * The current element that is focused.
    */
   activeElement: HTMLElement;
+
+  /**
+   * The last element that was focused.
+   */
+  previousElement: HTMLElement;
 
   /**
    * The position of the last selected element.
@@ -33,6 +38,14 @@ export interface IFocusOptions {
 }
 
 /**
+ * The IElementStore holds which item is currently in focus on the page.
+ * The focus servers will get *and set* the element to trigger focus changes.
+ */
+export interface IElementStore {
+  element: HTMLElement;
+}
+
+/**
  * The FocusContext is created for each focus change operation. It contains
  * the direction the focus is shifting, and the currently selected element
  * along with the reference rectangle. It can then be used to query for
@@ -47,6 +60,7 @@ export class FocusContext {
       activeElement: HTMLElement;
       directive?: Readonly<IArcHandler>;
       referenceRect: ClientRect;
+      previousElement?: HTMLElement;
     },
   ) {}
 
@@ -59,6 +73,7 @@ export class FocusContext {
     ignore: ReadonlySet<HTMLElement> = new Set(),
   ): HTMLElement | null {
     const options: IFocusOptions = {
+      previousElement: this.source.activeElement,
       ...this.source,
       direction: this.direction,
       ignore,
