@@ -1,6 +1,6 @@
 import { ArcEvent } from './arc-event';
 import { ArcFocusEvent } from './arc-focus-event';
-import { FocusContext, IFocusStrategy } from './focus';
+import { FocusContext, IElementStore, IFocusStrategy } from './focus';
 import { isFocusable, isNodeAttached, roundRect } from './focus/dom-utils';
 import { isForForm } from './focus/is-for-form';
 import { rescroll } from './focus/rescroll';
@@ -32,25 +32,18 @@ export class FocusService {
     width: 0,
   };
 
-  private get selected() {
-    return document.activeElement as HTMLElement;
-  }
+  /**
+   * The previously selected element.
+   */
+  private previousSelectedElement = this.elementStore.element;
 
   constructor(
     private readonly registry: StateContainer,
     private readonly root: HTMLElement,
     private readonly strategies: IFocusStrategy[],
+    private readonly elementStore: IElementStore,
   ) {
     this.setDefaultFocus();
-  }
-
-  /**
-   * onFocusChange is called when any element in the DOM gains focus. We use
-   * this is handle adjustments if the user interacts with other input
-   * devices, or if other application logic requests focus.
-   */
-  public onFocusChange(focus: HTMLElement, scrollSpeed: number | null = this.scrollSpeed) {
-    this.selectNode(focus, scrollSpeed);
   }
 
   /**
@@ -58,13 +51,6 @@ export class FocusService {
    */
   public selectNode(next: HTMLElement, scrollSpeed: number | null = this.scrollSpeed) {
     if (!this.root.contains(next)) {
-      return;
-    }
-
-    const canceled = !next.dispatchEvent(
-      new Event('arcselectingnode', { bubbles: true, cancelable: true }),
-    );
-    if (canceled) {
       return;
     }
 
@@ -77,22 +63,18 @@ export class FocusService {
    * e.g. when intercepting and transfering focus
    */
   public selectNodeWithoutEvent(next: HTMLElement, scrollSpeed: number | null = this.scrollSpeed) {
+    const previous = this.elementStore.element;
     if (!this.root) {
       throw new Error('root not set');
     }
-    if (this.selected === next) {
+    if (previous === next) {
       return;
     }
 
     this.referenceRect = next.getBoundingClientRect();
     rescroll(next, this.referenceRect, scrollSpeed, this.root);
-
-    const canceled = !next.dispatchEvent(
-      new Event('arcfocuschanging', { bubbles: true, cancelable: true }),
-    );
-    if (!canceled) {
-      next.focus();
-    }
+    this.previousSelectedElement = previous;
+    this.elementStore.element = next;
   }
 
   /**
@@ -101,12 +83,13 @@ export class FocusService {
    * by the focus service.
    */
   public sendButton(direction: Button): boolean {
-    if (isForForm(direction, this.selected)) {
+    const selected = this.elementStore.element;
+    if (isForForm(direction, selected)) {
       return false;
     }
 
-    const ev = this.createArcEvent(direction);
-    this.bubbleEvent(ev, 'onButton');
+    const ev = this.createArcEvent(direction, selected);
+    this.bubbleEvent(ev, 'onButton', selected);
     if (ev.defaultPrevented) {
       return true;
     }
@@ -116,7 +99,7 @@ export class FocusService {
 
     let originalNext = ev.next;
     for (let i = 0; i < FocusService.maxFocusInterations; i++) {
-      if (this.bubbleInOut(ev)) {
+      if (this.bubbleInOut(ev, selected)) {
         return true;
       }
       if (originalNext === ev.next) {
@@ -134,29 +117,30 @@ export class FocusService {
    * Creates an arcade-machine event to fire the given press. If a direction
    * is given, we'll find an appropriate focusable element.
    */
-  private createArcEvent(direction: Button): ArcEvent {
+  private createArcEvent(direction: Button, selected: HTMLElement): ArcEvent {
     if (!isDirectional(direction)) {
       return new ArcEvent({
-        directive: this.registry.find(this.selected),
+        directive: this.registry.find(selected),
         event: direction,
-        target: this.selected,
+        target: selected,
       });
     }
 
     const context = new FocusContext(this.root, direction, this.strategies, {
-      activeElement: this.selected,
-      directive: this.registry.find(this.selected),
-      referenceRect: this.root.contains(this.selected)
-        ? this.selected.getBoundingClientRect()
+      activeElement: selected,
+      directive: this.registry.find(selected),
+      previousElement: this.previousSelectedElement,
+      referenceRect: this.root.contains(selected)
+        ? selected.getBoundingClientRect()
         : this.referenceRect,
     });
 
     return new ArcFocusEvent({
       context,
-      directive: this.registry.find(this.selected),
+      directive: this.registry.find(selected),
       event: direction,
       next: context ? context.find(this.root) : null,
-      target: this.selected,
+      target: selected,
     });
   }
 
@@ -164,10 +148,10 @@ export class FocusService {
    * Attempts to effect the focus command, returning a
    * boolean if it was handled and no further action should be taken.
    */
-  private bubbleInOut(ev: ArcFocusEvent): boolean {
+  private bubbleInOut(ev: ArcFocusEvent, selected: HTMLElement): boolean {
     const originalNext = ev.next;
-    if (isNodeAttached(this.selected, this.root)) {
-      this.bubbleEvent(ev, 'onOutgoing');
+    if (isNodeAttached(selected, this.root)) {
+      this.bubbleEvent(ev, 'onOutgoing', selected);
     }
 
     // Abort if the user handled
@@ -192,10 +176,8 @@ export class FocusService {
       this.selectNode(ev.next, scrollSpeed);
       return true;
     } else if (ev.event === Button.Submit) {
-      if (this.selected) {
-        this.selected.click();
-        return true;
-      }
+      this.elementStore.element.click();
+      return true;
     }
 
     return false;
@@ -208,7 +190,7 @@ export class FocusService {
   private bubbleEvent(
     ev: ArcEvent,
     trigger: keyof IArcHandler,
-    source: HTMLElement | null = this.selected,
+    source: HTMLElement | null,
   ): ArcEvent {
     for (let el = source; !propogationStoped(ev) && el !== this.root && el; el = el.parentElement) {
       if (el === undefined) {
@@ -244,7 +226,7 @@ export class FocusService {
     // tslint:disable-next-line
     for (let i = 0; i < focusableElems.length; i += 1) {
       const potentialElement = focusableElems[i] as HTMLElement;
-      if (this.selected === potentialElement || !isFocusable(potentialElement)) {
+      if (this.elementStore.element === potentialElement || !isFocusable(potentialElement)) {
         continue;
       }
       const potentialRect = roundRect(potentialElement.getBoundingClientRect());

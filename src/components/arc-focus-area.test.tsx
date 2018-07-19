@@ -2,8 +2,9 @@ import { expect } from 'chai';
 import * as React from 'react';
 
 import { ArcFocusEvent } from '../arc-focus-event';
-import { ArcContext } from '../internal-types';
+import { NativeElementStore } from '../focus/native-element-store';
 import { Button } from '../model';
+import { instance } from '../singleton';
 import { StateContainer } from '../state/state-container';
 import { FocusArea } from './arc-focus-area';
 import { mountToDOM, NoopFocusContext } from './util.test';
@@ -11,15 +12,18 @@ import { mountToDOM, NoopFocusContext } from './util.test';
 describe('ArcFocusArea', () => {
   const render = (focusIn?: string) => {
     const state = new StateContainer();
+    instance.setServices({
+      elementStore: new NativeElementStore(),
+      stateContainer: state,
+    });
+
     const contents = mountToDOM(
       <div>
-        <ArcContext.Provider value={{ state }}>
-          <FocusArea focusIn={focusIn}>
-            <div className="a" />
-            <div className="b" tabIndex={0} />
-            <div className="c" tabIndex={0}/>
-          </FocusArea>
-        </ArcContext.Provider>,
+        <FocusArea focusIn={focusIn}>
+          <div className="a" />
+          <div className="b" tabIndex={0} />
+          <div className="c" tabIndex={0} />
+        </FocusArea>
       </div>,
     );
 

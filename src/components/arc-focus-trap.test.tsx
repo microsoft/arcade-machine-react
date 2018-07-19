@@ -2,8 +2,9 @@ import { expect } from 'chai';
 import * as React from 'react';
 
 import { ArcFocusEvent } from '../arc-focus-event';
-import { ArcContext } from '../internal-types';
+import { NativeElementStore } from '../focus/native-element-store';
 import { Button } from '../model';
+import { instance } from '../singleton';
 import { StateContainer } from '../state/state-container';
 import { FocusTrap, IFocusTrapProps } from './arc-focus-trap';
 import { mountToDOM, NoopFocusContext } from './util.test';
@@ -11,24 +12,23 @@ import { mountToDOM, NoopFocusContext } from './util.test';
 const delay = () => new Promise(resolve => setTimeout(resolve));
 
 describe('ArcFocusTrap', () => {
-  class TestComponent extends React.Component<{
-    state: StateContainer;
-    showTrapDefault?: boolean;
-  } & Partial<IFocusTrapProps>> {
+  class TestComponent extends React.Component<
+    {
+      showTrapDefault?: boolean;
+    } & Partial<IFocusTrapProps>
+  > {
     public state = { showTrap: this.props.showTrapDefault };
 
     public render() {
       return (
         <div>
-          <ArcContext.Provider value={{ state: this.props.state }}>
-            <div className="a" tabIndex={0} onClick={this.showTrap} />
-            {this.state.showTrap ? (
-              <FocusTrap focusIn={this.props.focusIn} focusOut={this.props.focusOut}>
-                <div className="b" tabIndex={0} onClick={this.hideTrap} />
-                <div className="c" tabIndex={0} />
-              </FocusTrap>
-            ) : null}
-          </ArcContext.Provider>
+          <div className="a" tabIndex={0} onClick={this.showTrap} />
+          {this.state.showTrap ? (
+            <FocusTrap focusIn={this.props.focusIn} focusOut={this.props.focusOut}>
+              <div className="b" tabIndex={0} onClick={this.hideTrap} />
+              <div className="c" tabIndex={0} />
+            </FocusTrap>
+          ) : null}
         </div>
       );
     }
@@ -39,13 +39,12 @@ describe('ArcFocusTrap', () => {
 
   const render = (props?: Partial<IFocusTrapProps>, showTrapDefault: boolean = true) => {
     const state = new StateContainer();
-    const contents = mountToDOM(
-      <TestComponent
-        state={state}
-        {...props}
-        showTrapDefault={showTrapDefault}
-      />
-    );
+    instance.setServices({
+      elementStore: new NativeElementStore(),
+      stateContainer: state,
+    });
+
+    const contents = mountToDOM(<TestComponent {...props} showTrapDefault={showTrapDefault} />);
     const element = contents.getDOMNode().querySelector('.arc-focus-trap') as HTMLElement;
     const record = state.find(element)!;
 
