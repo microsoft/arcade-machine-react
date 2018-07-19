@@ -1,8 +1,8 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
-import { ArcContext, Composable, renderComposed, requireContext } from '../internal-types';
-import { StateContainer } from '../state/state-container';
+import { Composable, renderComposed } from '../internal-types';
+import { instance } from '../singleton';
 
 /**
  * FocusExclude will exclude the attached element, and optionally its
@@ -13,22 +13,9 @@ export class FocusExclude extends React.PureComponent<{
   deep?: boolean;
 }> {
   /**
-   * Gets the HTMLElement this scope is attached to.
-   */
-  private stateContainer!: StateContainer;
-
-  /**
    * The node this element is attached to.
    */
   private node!: HTMLElement;
-
-  /**
-   * Handler function called with the ArcContext state.
-   */
-  private readonly withContext = requireContext(({ state }) => {
-    this.stateContainer = state;
-    return this.props.children;
-  });
 
   public componentDidMount() {
     const element = ReactDOM.findDOMNode(this);
@@ -38,7 +25,7 @@ export class FocusExclude extends React.PureComponent<{
       );
     }
 
-    this.stateContainer.add(this, {
+    instance.getServices().stateContainer.add(this, {
       element,
       onIncoming: ev => {
         if (!ev.next) {
@@ -57,11 +44,11 @@ export class FocusExclude extends React.PureComponent<{
   }
 
   public componentWillUnmount() {
-    this.stateContainer.remove(this, this.node);
+    instance.getServices().stateContainer.remove(this, this.node);
   }
 
   public render() {
-    return <ArcContext.Consumer>{this.withContext}</ArcContext.Consumer>;
+    return this.props.children;
   }
 
   private isElementExcluded(element: HTMLElement | null): boolean {
@@ -80,7 +67,6 @@ export class FocusExclude extends React.PureComponent<{
 /**
  * HOC to create a FocusExclude.
  */
-export const ArcFocusExclude = <P extends {} = {}>(
-  Composed: Composable<P>,
-  deep?: boolean,
-) => (props: P) => <FocusExclude deep={deep}>{renderComposed(Composed, props)}</FocusExclude>;
+export const ArcFocusExclude = <P extends {} = {}>(Composed: Composable<P>, deep?: boolean) => (
+  props: P,
+) => <FocusExclude deep={deep}>{renderComposed(Composed, props)}</FocusExclude>;

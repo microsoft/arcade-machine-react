@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { ArcContext, Composable, findElement, findFocusable, renderComposed, requireContext } from '../internal-types';
-import { StateContainer } from '../state/state-container';
+import { Composable, findElement, findFocusable, renderComposed } from '../internal-types';
+import { instance } from '../singleton';
 
 /**
  * The ArcFocusArea acts as a virtual focus element which transfers focus
@@ -42,20 +42,10 @@ export class FocusArea extends React.PureComponent<{
   focusIn?: HTMLElement | string;
 }> {
   private containerRef = React.createRef<HTMLDivElement>();
-  private stateContainer!: StateContainer;
-
-  private readonly withContext = requireContext(({ state }) => {
-    this.stateContainer = state;
-    return (
-      <div tabIndex={0} ref={this.containerRef}>
-        {this.props.children}
-      </div>
-    );
-  });
 
   public componentDidMount() {
     const element = this.containerRef.current!;
-    this.stateContainer.add(this, {
+    instance.getServices().stateContainer.add(this, {
       element,
       onIncoming: ev => {
         if (ev.next !== element) {
@@ -76,11 +66,15 @@ export class FocusArea extends React.PureComponent<{
   }
 
   public componentWillUnmount() {
-    this.stateContainer.remove(this, this.containerRef.current!);
+    instance.getServices().stateContainer.remove(this, this.containerRef.current!);
   }
 
   public render() {
-    return <ArcContext.Consumer>{this.withContext}</ArcContext.Consumer>;
+    return (
+      <div tabIndex={0} ref={this.containerRef}>
+        {this.props.children}
+      </div>
+    );
   }
 }
 

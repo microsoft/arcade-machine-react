@@ -24,6 +24,7 @@
   background: #000;
   color: #fff;
 }
+.box.arc-selected,
 .box:focus {
   background: #f00;
 }
@@ -35,6 +36,7 @@
   background: #000;
   color: #fff;
 }
+.square.arc-selected,
 .square:focus {
   background: #f00;
 }
@@ -55,8 +57,11 @@ textarea {
   box-shadow: 0;
   outline: 0 !important;
 }
+input.arc-selected,
 input:focus,
+button.arc-selected,
 button:focus,
+textarea.arc-selected,
 textarea:focus {
   border-color: #f00;
 }
@@ -94,6 +99,19 @@ textarea:focus {
   margin: 16px;
 }
 
+.visibility-test .case-name.arc-selected,
 .visibility-test .case-name:focus {
   border-color: red;
+}
+
+table.benchmarks th {
+  text-align: left;
+}
+
+table.benchmarks td:nth-child(1) {
+  width: 200px;
+}
+
+table.benchmarks td:nth-child(2) {
+  width: 500px;
 }

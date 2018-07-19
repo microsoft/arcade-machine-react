@@ -1,3 +1,5 @@
+import { instance } from '../singleton';
+
 export function roundRect(rect: HTMLElement | ClientRect): ClientRect {
   if (rect instanceof HTMLElement) {
     rect = rect.getBoundingClientRect();
@@ -35,11 +37,12 @@ export function isVisible(element: HTMLElement | null): boolean {
  * Returns if the element can receive focus.
  */
 export function isFocusable(el: HTMLElement): boolean {
-  if (el === document.activeElement) {
+  const activeElement = instance.getServices().elementStore.element;
+  if (el === activeElement) {
     return false;
   }
   // to prevent navigating to parent container elements with arc-focus-inside
-  if (document.activeElement !== document.body && document.activeElement.contains(el)) {
+  if (activeElement !== document.body && activeElement.contains(el)) {
     return false;
   }
 

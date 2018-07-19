@@ -3,9 +3,9 @@ import * as ReactDOM from 'react-dom';
 
 import { ArcEvent } from '../arc-event';
 import { ArcFocusEvent } from '../arc-focus-event';
-import { ArcContext, Composable, renderComposed, requireContext } from '../internal-types';
+import { Composable, renderComposed } from '../internal-types';
 import { IArcHandler } from '../model';
-import { StateContainer } from '../state/state-container';
+import { instance } from '../singleton';
 
 const isArcScopeSymbol = Symbol();
 
@@ -45,22 +45,9 @@ export const ArcScope = <P extends {} = {}>(
     public static options = options;
 
     /**
-     * Gets the HTMLElement this scope is attached to.
-     */
-    private stateContainer!: StateContainer;
-
-    /**
      * The node this element is attached to.
      */
     private node!: HTMLElement;
-
-    /**
-     * Handler function called with the ArcContext state.
-     */
-    private readonly withContext = requireContext(({ state }) => {
-      this.stateContainer = state;
-      return renderComposed(Composed, this.props);
-    });
 
     public componentDidMount() {
       const node = ReactDOM.findDOMNode(this);
@@ -70,16 +57,18 @@ export const ArcScope = <P extends {} = {}>(
         );
       }
 
-      this.stateContainer.add(this, { element: node, ...ArcScopeComponent.options });
+      instance
+        .getServices()
+        .stateContainer.add(this, { element: node, ...ArcScopeComponent.options });
       this.node = node;
     }
 
     public componentWillUnmount() {
-      this.stateContainer.remove(this, this.node);
+      instance.getServices().stateContainer.remove(this, this.node);
     }
 
     public render() {
-      return <ArcContext.Consumer>{this.withContext}</ArcContext.Consumer>;
+      return renderComposed(Composed, this.props);
     }
   };
 };
