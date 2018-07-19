@@ -1,7 +1,8 @@
 import { expect } from 'chai';
 import * as React from 'react';
 
-import { ArcContext } from '../internal-types';
+import { NativeElementStore } from '../focus/native-element-store';
+import { instance } from '../singleton';
 import { StateContainer } from '../state/state-container';
 import { ArcDown, ArcUp } from './arc-scope';
 import { mountToDOM } from './util.test';
@@ -9,11 +10,14 @@ import { mountToDOM } from './util.test';
 describe('ArcScope', () => {
   const render = (Component: React.ComponentType<{}>) => {
     const state = new StateContainer();
+    instance.setServices({
+      elementStore: new NativeElementStore(),
+      stateContainer: state,
+    });
+
     const contents = mountToDOM(
       <div>
-        <ArcContext.Provider value={{ state }}>
-          <Component />
-        </ArcContext.Provider>,
+        <Component />
       </div>,
     );
 
@@ -43,7 +47,9 @@ describe('ArcScope', () => {
   });
 
   it('composes multiple arc scopes into a single context', () => {
-    const { state, contents } = render(ArcDown('#foo', ArcUp('#bar', () => <div className="testclass" />)));
+    const { state, contents } = render(
+      ArcDown('#foo', ArcUp('#bar', () => <div className="testclass" />)),
+    );
     const targetEl = contents.getDOMNode().querySelector('.testclass') as HTMLElement;
     expect(state.find(targetEl)).to.deep.equal({
       arcFocusDown: '#foo',

@@ -1,13 +1,6 @@
 import * as React from 'react';
-import {
-  ArcContext,
-  Composable,
-  findElement,
-  findFocusable,
-  renderComposed,
-  requireContext,
-} from '../internal-types';
-import { StateContainer } from '../state/state-container';
+import { Composable, findElement, findFocusable, renderComposed } from '../internal-types';
+import { instance } from '../singleton';
 
 /**
  * Properties passed to the FocusTrap.
@@ -38,19 +31,9 @@ export interface IFocusTrapProps {
 export class FocusTrap extends React.PureComponent<IFocusTrapProps> {
   private containerRef = React.createRef<HTMLDivElement>();
   private previouslyFocusedElement!: HTMLElement;
-  private stateContainer!: StateContainer;
-
-  private readonly withContext = requireContext(({ state }) => {
-    this.stateContainer = state;
-    return (
-      <div className="arc-focus-trap" tabIndex={0} ref={this.containerRef}>
-        {this.props.children}
-      </div>
-    );
-  });
 
   public componentWillMount() {
-    this.previouslyFocusedElement = document.activeElement as HTMLElement;
+    this.previouslyFocusedElement = instance.getServices().elementStore.element;
   }
 
   public componentDidMount() {
@@ -59,15 +42,16 @@ export class FocusTrap extends React.PureComponent<IFocusTrapProps> {
     // setTimeout to give time for any autofocusing to fire before we go
     // ahead and force the focus over.
     setTimeout(() => {
-      if (!element.contains(document.activeElement)) {
+      const store = instance.getServices().elementStore;
+      if (!element.contains(store.element)) {
         const next = findFocusable(element, this.props.focusIn);
         if (next) {
-          next.focus();
+          store.element = next;
         }
       }
     });
 
-    this.stateContainer.add(this, {
+    instance.getServices().stateContainer.add(this, {
       element,
       onOutgoing: ev => {
         if (ev.next && !element.contains(ev.next)) {
@@ -78,21 +62,26 @@ export class FocusTrap extends React.PureComponent<IFocusTrapProps> {
   }
 
   public componentWillUnmount() {
-    this.stateContainer.remove(this, this.containerRef.current!);
+    const { stateContainer, elementStore } = instance.getServices();
+    stateContainer.remove(this, this.containerRef.current!);
 
     if (this.props.focusOut) {
       const target = findElement(document.body, this.props.focusOut);
       if (target) {
-        target.focus();
-        return
+        elementStore.element = target;
+        return;
       }
     }
 
-    this.previouslyFocusedElement.focus();
+    elementStore.element = this.previouslyFocusedElement;
   }
 
   public render() {
-    return <ArcContext.Consumer>{this.withContext}</ArcContext.Consumer>;
+    return (
+      <div className="arc-focus-trap" tabIndex={0} ref={this.containerRef}>
+        {this.props.children}
+      </div>
+    );
   }
 }
 
