@@ -3,9 +3,9 @@ import { ArcFocusEvent } from './arc-focus-event';
 import { FocusContext, IElementStore, IFocusStrategy } from './focus';
 import { isFocusable, isNodeAttached, roundRect } from './focus/dom-utils';
 import { isForForm } from './focus/is-for-form';
-import { rescroll } from './focus/rescroll';
 import { propogationStoped, resetEvent } from './internal-types';
 import { Button, IArcHandler, isDirectional } from './model';
+import { ScrollExecutor } from './scroll';
 import { StateContainer } from './state/state-container';
 
 export class FocusService {
@@ -14,12 +14,6 @@ export class FocusService {
    * Used to prevent infinite loops.
    */
   public static maxFocusInterations = 10;
-
-  /**
-   * Animation speed in pixels per second for scrolling elements into view.
-   * This can be Infinity to disable the animation, or null to disable scrolling.
-   */
-  public scrollSpeed: number | null = 1000;
 
   // The client bounding rect when we first selected the element, cached
   // so that we can reuse it if the element gets detached.
@@ -42,6 +36,7 @@ export class FocusService {
     private readonly root: HTMLElement,
     private readonly strategies: IFocusStrategy[],
     private readonly elementStore: IElementStore,
+    private readonly scroller: ScrollExecutor,
   ) {
     this.setDefaultFocus();
   }
@@ -49,12 +44,12 @@ export class FocusService {
   /**
    * Wrapper around moveFocus to dispatch arcselectingnode event
    */
-  public selectNode(next: HTMLElement, scrollSpeed: number | null = this.scrollSpeed) {
+  public selectNode(next: HTMLElement) {
     if (!this.root.contains(next)) {
       return;
     }
 
-    this.selectNodeWithoutEvent(next, scrollSpeed);
+    this.selectNodeWithoutEvent(next);
   }
 
   /**
@@ -62,17 +57,14 @@ export class FocusService {
    * This is useful when you do not want to dispatch another event
    * e.g. when intercepting and transfering focus
    */
-  public selectNodeWithoutEvent(next: HTMLElement, scrollSpeed: number | null = this.scrollSpeed) {
+  public selectNodeWithoutEvent(next: HTMLElement) {
     const previous = this.elementStore.element;
-    if (!this.root) {
-      throw new Error('root not set');
-    }
     if (previous === next) {
       return;
     }
 
     this.referenceRect = next.getBoundingClientRect();
-    rescroll(next, this.referenceRect, scrollSpeed, this.root);
+    this.scroller.scrollTo(next, this.referenceRect);
     this.previousSelectedElement = previous;
     this.elementStore.element = next;
   }
@@ -167,13 +159,13 @@ export class FocusService {
     return ev.defaultPrevented;
   }
 
-  private defaultFires(ev: ArcEvent, scrollSpeed: number | null = this.scrollSpeed): boolean {
+  private defaultFires(ev: ArcEvent): boolean {
     if (ev.defaultPrevented) {
       return true;
     }
 
     if (ev instanceof ArcFocusEvent && ev.next !== null) {
-      this.selectNode(ev.next, scrollSpeed);
+      this.selectNode(ev.next);
       return true;
     } else if (ev.event === Button.Submit) {
       this.elementStore.element.click();
@@ -220,7 +212,7 @@ export class FocusService {
   /**
    * Reset the focus if arcade-machine wanders out of root
    */
-  private setDefaultFocus(scrollSpeed: number | null = this.scrollSpeed) {
+  private setDefaultFocus() {
     const focusableElems = this.root.querySelectorAll('[tabIndex]');
 
     // tslint:disable-next-line
@@ -235,7 +227,7 @@ export class FocusService {
         continue;
       }
 
-      this.selectNode(potentialElement, scrollSpeed);
+      this.selectNode(potentialElement);
       return;
     }
   }

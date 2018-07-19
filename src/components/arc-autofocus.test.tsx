@@ -3,7 +3,6 @@ import * as React from 'react';
 
 import { NativeElementStore } from '../focus/native-element-store';
 import { instance } from '../singleton';
-import { StateContainer } from '../state/state-container';
 import { ArcAutoFocus } from './arc-autofocus';
 import { mountToDOM } from './util.test';
 
@@ -14,7 +13,6 @@ describe('ArcAutoFocus', () => {
   beforeEach(() => {
     instance.setServices({
       elementStore: new NativeElementStore(),
-      stateContainer: new StateContainer(),
     });
   });
 
