@@ -1,4 +1,5 @@
 import { IElementStore } from './focus';
+import { ScrollRegistry } from './scroll/scroll-registry';
 import { StateContainer } from './state/state-container';
 
 /**
@@ -7,6 +8,7 @@ import { StateContainer } from './state/state-container';
 export interface IArcServices {
   elementStore: IElementStore;
   stateContainer: StateContainer;
+  scrollRegistry: ScrollRegistry;
 }
 
 /**
@@ -24,7 +26,7 @@ export class ArcSingleton {
   /**
    * setServices is called by the ArcRoot when it gets set up.
    */
-  public setServices(services: IArcServices | undefined) {
+  public setServices(services: Partial<IArcServices> | undefined) {
     if (this.services && services) {
       throw new Error(
         'Attempted to register a second <ArcRoot /> without destroying the first one. ' +
@@ -32,7 +34,17 @@ export class ArcSingleton {
       );
     }
 
-    this.services = services;
+    if (!services) {
+      this.services = undefined;
+      return;
+    }
+
+    this.services = {
+      elementStore: services.elementStore!,
+      scrollRegistry: new ScrollRegistry(),
+      stateContainer: new StateContainer(),
+      ...services,
+    };
   }
 
   /**

@@ -12,6 +12,10 @@ import { GamepadInput } from '../input/gamepad-input';
 import { IInputMethod } from '../input/input-method';
 import { KeyboardInput } from '../input/keyboard-input';
 import { Composable, renderComposed } from '../internal-types';
+import { IScrollingAlgorithm, ScrollExecutor } from '../scroll';
+import { NativeSmoothScrollingAlgorithm } from '../scroll/native-smooth-scrolling';
+import { ScrollRegistry } from '../scroll/scroll-registry';
+import { SmoothScrollingAlgorithm } from '../scroll/smooth-scrolling-algorithm';
 import { instance } from '../singleton';
 import { StateContainer } from '../state/state-container';
 
@@ -24,6 +28,7 @@ export interface IRootOptions {
   inputs: IInputMethod[];
   focus: IFocusStrategy[];
   elementStore: IElementStore;
+  scrolling: IScrollingAlgorithm;
 }
 
 /**
@@ -36,6 +41,7 @@ export function defaultOptions(): IRootOptions {
     elementStore: new NativeElementStore(),
     focus: [new FocusByRegistry(), new FocusByDistance()],
     inputs: [new GamepadInput(), new KeyboardInput()],
+    scrolling: new NativeSmoothScrollingAlgorithm(new SmoothScrollingAlgorithm()),
   };
 }
 
@@ -54,6 +60,7 @@ export function defaultOptions(): IRootOptions {
  */
 class Root extends React.PureComponent<IRootOptions> {
   private stateContainer = new StateContainer();
+  private scrollRegistry = new ScrollRegistry();
   private focus!: FocusService;
   private input!: InputService;
   private rootRef = React.createRef<HTMLDivElement>();
@@ -64,6 +71,7 @@ class Root extends React.PureComponent<IRootOptions> {
 
     instance.setServices({
       elementStore: this.props.elementStore,
+      scrollRegistry: this.scrollRegistry,
       stateContainer: this.stateContainer,
     });
   }
@@ -74,6 +82,7 @@ class Root extends React.PureComponent<IRootOptions> {
       this.rootRef.current!,
       this.props.focus,
       this.props.elementStore,
+      new ScrollExecutor(this.scrollRegistry, this.props.scrolling),
     ));
     const input = (this.input = new InputService(this.props.inputs));
 

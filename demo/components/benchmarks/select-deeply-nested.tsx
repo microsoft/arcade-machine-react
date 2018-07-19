@@ -19,7 +19,7 @@ const NestedElement: React.ComponentType<INestedProps> = ({ levels, children }: 
   <div>{levels ? <NestedElement levels={levels - 1} children={children} /> : children}</div>
 );
 
-export const selectDeeplyNested: IBenchmark<void, boolean> = {
+export const selectDeeplyNestedBenchmark: IBenchmark<void, boolean> = {
   name: 'virtual store w/ highly nested elements (100 levels from the root)',
   fixture: ArcRoot(
     () => (
