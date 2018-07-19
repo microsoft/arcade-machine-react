@@ -1,7 +1,7 @@
 import { selectSimpleElementBenchmark } from './select-simple-element';
 import { selectArcadeMachineBenchmark } from './select-arcade-machine';
 import { virtualArcadeSelectBenchmark } from './virtual-arcade-select';
-import { selectDeeplyNested } from './select-deeply-nested';
+import { selectDeeplyNestedBenchmark } from './select-deeply-nested';
 
 /**
  * IBenchmarkState is passed to the setup of each benchmark script.
@@ -24,5 +24,5 @@ export const benchmarks: IBenchmark<any, any>[] = [
   selectSimpleElementBenchmark,
   selectArcadeMachineBenchmark,
   virtualArcadeSelectBenchmark,
-  selectDeeplyNested,
+  selectDeeplyNestedBenchmark,
 ];
