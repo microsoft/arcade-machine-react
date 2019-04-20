@@ -87,13 +87,13 @@ describe('ArcFocusTrap', () => {
   it('focuses the first element by default', async () => {
     render();
     await delay();
-    expect(document.activeElement.className).to.equal('b');
+    expect(document.activeElement!.className).to.equal('b');
   });
 
   it('passes focus to an overridden selector', async () => {
     render({ focusIn: '.c' });
     await delay();
-    expect(document.activeElement.className).to.equal('c');
+    expect(document.activeElement!.className).to.equal('c');
   });
 
   it('passes focus to the previously focused element when destroying', async () => {
@@ -101,18 +101,18 @@ describe('ArcFocusTrap', () => {
     (contents.getDOMNode().querySelector('.a') as HTMLElement).focus();
     contents.find('.a').simulate('click');
     await delay();
-    expect(document.activeElement.className).to.equal('b');
+    expect(document.activeElement!.className).to.equal('b');
     contents.find('.b').simulate('click');
-    expect(document.activeElement.className).to.equal('a');
+    expect(document.activeElement!.className).to.equal('a');
   });
 
   it('allows a custom focus out element', async () => {
     const { contents } = render({ focusOut: document.body }, false);
     contents.find('.a').simulate('click');
     await delay();
-    expect(document.activeElement.className).to.equal('b');
+    expect(document.activeElement!.className).to.equal('b');
     contents.find('.b').simulate('click');
-    expect(document.activeElement).to.equal(document.body);
+    expect(document.activeElement!).to.equal(document.body);
   });
 
   it('respects any immediate autofocused elements', async () => {
@@ -120,6 +120,6 @@ describe('ArcFocusTrap', () => {
     contents.find('.a').simulate('click');
     (contents.getDOMNode().querySelector('.c') as HTMLElement).focus();
     await delay();
-    expect(document.activeElement.className).to.equal('c');
+    expect(document.activeElement!.className).to.equal('c');
   });
 });

@@ -61,8 +61,6 @@ export function defaultOptions(): IRootOptions {
 class Root extends React.PureComponent<IRootOptions> {
   private stateContainer = new StateContainer();
   private scrollRegistry = new ScrollRegistry();
-  private focus!: FocusService;
-  private input!: InputService;
   private rootRef = React.createRef<HTMLDivElement>();
   private unmounted = new ReplaySubject<void>(1);
 
@@ -77,14 +75,14 @@ class Root extends React.PureComponent<IRootOptions> {
   }
 
   public componentDidMount() {
-    const focus = (this.focus = new FocusService(
+    const focus = new FocusService(
       this.stateContainer,
       this.rootRef.current!,
       this.props.focus,
       this.props.elementStore,
       new ScrollExecutor(this.scrollRegistry, this.props.scrolling),
-    ));
-    const input = (this.input = new InputService(this.props.inputs));
+    );
+    const input = new InputService(this.props.inputs);
 
     input.events.pipe(takeUntil(this.unmounted)).subscribe(({ button, event }) => {
       if (focus.sendButton(button) && event) {

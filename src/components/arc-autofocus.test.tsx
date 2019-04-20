@@ -24,7 +24,7 @@ describe('ArcAutoFocus', () => {
       </div>,
     );
 
-    expect(document.activeElement.className).to.deep.equal('focused');
+    expect(document.activeElement!.className).to.deep.equal('focused');
     cmp.unmount();
   });
 
@@ -41,7 +41,7 @@ describe('ArcAutoFocus', () => {
         <Fixture />
       </div>,
     );
-    expect(document.activeElement.className).to.deep.equal('focused');
+    expect(document.activeElement!.className).to.deep.equal('focused');
     cmp.unmount();
   });
 });
