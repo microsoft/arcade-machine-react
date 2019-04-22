@@ -117,8 +117,8 @@ export class ElementFinder {
       this.shortlisted.forEach(el => el.calcSecondaryDistance(this.refRect, this.dir));
 
       // return the closest element on secondary axis
-      return this.shortlisted.reduce(
-        (prev, curr) => (curr.secondaryDistance <= prev.secondaryDistance ? curr : prev),
+      return this.shortlisted.reduce((prev, curr) =>
+        curr.secondaryDistance <= prev.secondaryDistance ? curr : prev,
       ).el;
     }
 
@@ -160,8 +160,8 @@ export class ElementFinder {
         .el;
     } else {
       // return top left element
-      return this.shortlisted.reduce(
-        (prev, curr) => (curr.rect.left < prev.rect.left ? curr : prev),
+      return this.shortlisted.reduce((prev, curr) =>
+        curr.rect.left < prev.rect.left ? curr : prev,
       ).el;
     }
   }

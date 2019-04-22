@@ -6,8 +6,8 @@ export function horizontalDelta(rect: ClientRect) {
   return rect.left < 0
     ? rect.left
     : rect.right > window.innerWidth
-      ? rect.right - window.innerWidth
-      : 0;
+    ? rect.right - window.innerWidth
+    : 0;
 }
 
 /**
@@ -18,6 +18,6 @@ export function verticalDelta(rect: ClientRect) {
   return rect.top < 0
     ? rect.top
     : rect.bottom > window.innerHeight
-      ? rect.bottom - window.innerHeight
-      : 0;
+    ? rect.bottom - window.innerHeight
+    : 0;
 }
