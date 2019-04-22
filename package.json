@@ -1,6 +1,6 @@
 {
   "name": "@mixer/arcade-machine-react",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Input abstraction layer for gamepads, keyboards, and UWP apps",
   "module": "dist/index.js",
   "main": "dist/cjs/index.js",
