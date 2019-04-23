@@ -30,10 +30,12 @@ describe('ArcAutoFocus', () => {
 
   it('focuses via selector', () => {
     const Fixture = ArcAutoFocus(
-      <div>
-        <NormalInput className="not-focused" />
-        <NormalInput className="focused" />,
-      </div>,
+      () => (
+        <div>
+          <NormalInput className="not-focused" />
+          <NormalInput className="focused" />,
+        </div>
+      ),
       '.focused',
     );
     const cmp = mountToDOM(

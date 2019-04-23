@@ -11,7 +11,6 @@ import { InputService } from '../input';
 import { GamepadInput } from '../input/gamepad-input';
 import { IInputMethod } from '../input/input-method';
 import { KeyboardInput } from '../input/keyboard-input';
-import { Composable, renderComposed } from '../internal-types';
 import { IScrollingAlgorithm, ScrollExecutor } from '../scroll';
 import { NativeSmoothScrollingAlgorithm } from '../scroll/native-smooth-scrolling';
 import { ScrollRegistry } from '../scroll/scroll-registry';
@@ -104,6 +103,10 @@ class Root extends React.PureComponent<IRootOptions> {
 /**
  * HOC to create an arcade-machine Root element.
  */
-export const ArcRoot = <P extends {}>(Composed: Composable<P>, options: IRootOptions) => (
+export const ArcRoot = <P extends {}>(Composed: React.ComponentType<P>, options: IRootOptions) => (
   props: P,
-) => <Root {...options}>{renderComposed(Composed, props)}</Root>;
+) => (
+  <Root {...options}>
+    <Composed {...props} />
+  </Root>
+);

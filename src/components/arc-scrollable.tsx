@@ -1,7 +1,6 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
-import { Composable, renderComposed } from '../internal-types';
 import { instance } from '../singleton';
 
 /**
@@ -48,11 +47,11 @@ export class Scrollable extends React.PureComponent<{
  * HOC to create a Scrollable.
  */
 export const ArcScrollable = <P extends {} = {}>(
-  Composed: Composable<P>,
+  Composed: React.ComponentType<P>,
   vertical: boolean = true,
   horizontal: boolean = false,
 ) => (props: P) => (
   <Scrollable vertical={vertical} horizontal={horizontal}>
-    {renderComposed(Composed, props)}
+    <Composed {...props} />
   </Scrollable>
 );

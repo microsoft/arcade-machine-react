@@ -3,7 +3,6 @@ import * as ReactDOM from 'react-dom';
 
 import { ArcEvent } from '../arc-event';
 import { ArcFocusEvent } from '../arc-focus-event';
-import { Composable, renderComposed } from '../internal-types';
 import { IArcHandler } from '../model';
 import { instance } from '../singleton';
 
@@ -18,12 +17,42 @@ function isArcScope(type: any): type is IArcScopeClass<any> {
   return type[isArcScopeSymbol] === true;
 }
 
+// tslint:disable:max-classes-per-file
+
 /**
- * ArcScope configures the arcade-machine options used for components
+ * A "scope" upon which event handlers can be attached.
+ */
+export class ArcScope extends React.PureComponent<Partial<IArcHandler>> {
+  /**
+   * The node this element is attached to.
+   */
+  private node!: HTMLElement;
+
+  public componentDidMount() {
+    const node = ReactDOM.findDOMNode(this);
+    if (!(node instanceof HTMLElement)) {
+      throw new Error(`Attempted to mount an <ArcScope /> not attached to an element, got ${node}`);
+    }
+
+    instance.getServices().stateContainer.add(this, { element: node, ...this.props });
+    this.node = node;
+  }
+
+  public componentWillUnmount() {
+    instance.getServices().stateContainer.remove(this, this.node);
+  }
+
+  public render() {
+    return this.props.children;
+  }
+}
+
+/**
+ * ArcScopeWrapper configures the arcade-machine options used for components
  * nested/composed inside of it.
  */
-export const ArcScope = <P extends {} = {}>(
-  Composed: Composable<P>,
+export const ArcScopeWrapper = <P extends {} = {}>(
+  Composed: React.ComponentType<P>,
   options: Partial<IArcHandler>,
 ): React.ComponentClass<P> => {
   // We collapse multiple combined scopes together, in an optimization
@@ -44,31 +73,12 @@ export const ArcScope = <P extends {} = {}>(
      */
     public static options = options;
 
-    /**
-     * The node this element is attached to.
-     */
-    private node!: HTMLElement;
-
-    public componentDidMount() {
-      const node = ReactDOM.findDOMNode(this);
-      if (!(node instanceof HTMLElement)) {
-        throw new Error(
-          `Attempted to mount an <ArcScope /> not attached to an element, got ${node}`,
-        );
-      }
-
-      instance
-        .getServices()
-        .stateContainer.add(this, { element: node, ...ArcScopeComponent.options });
-      this.node = node;
-    }
-
-    public componentWillUnmount() {
-      instance.getServices().stateContainer.remove(this, this.node);
-    }
-
     public render() {
-      return renderComposed(Composed, this.props);
+      return React.createElement(
+        ArcScope,
+        ArcScopeComponent.options,
+        React.createElement(Composed, this.props),
+      );
     }
   };
 };
@@ -76,36 +86,42 @@ export const ArcScope = <P extends {} = {}>(
 /**
  * Overrides the element focused when going up from this element.
  */
-export const ArcUp = <P extends {} = {}>(target: HTMLElement | string, composed: Composable<P>) =>
-  ArcScope(composed, { arcFocusUp: target });
+export const ArcUp = <P extends {} = {}>(
+  target: HTMLElement | string,
+  composed: React.ComponentType<P>,
+) => ArcScopeWrapper(composed, { arcFocusUp: target });
 
 /**
  * Overrides the element focused when going left from this element.
  */
-export const ArcLeft = <P extends {} = {}>(target: HTMLElement | string, composed: Composable<P>) =>
-  ArcScope(composed, { arcFocusLeft: target });
+export const ArcLeft = <P extends {} = {}>(
+  target: HTMLElement | string,
+  composed: React.ComponentType<P>,
+) => ArcScopeWrapper(composed, { arcFocusLeft: target });
 
 /**
  * Overrides the element focused when going down from this element.
  */
-export const ArcDown = <P extends {} = {}>(target: HTMLElement | string, composed: Composable<P>) =>
-  ArcScope(composed, { arcFocusDown: target });
+export const ArcDown = <P extends {} = {}>(
+  target: HTMLElement | string,
+  composed: React.ComponentType<P>,
+) => ArcScopeWrapper(composed, { arcFocusDown: target });
 
 /**
  * Overrides the element focused when going right from this element.
  */
 export const ArcRight = <P extends {} = {}>(
   target: HTMLElement | string,
-  composed: Composable<P>,
-) => ArcScope(composed, { arcFocusRight: target });
+  composed: React.ComponentType<P>,
+) => ArcScopeWrapper(composed, { arcFocusRight: target });
 /**
  * Called with an IArcEvent focus is about
  * to leave this element or one of its children.
  */
 export const ArcOnOutgoing = <P extends {} = {}>(
   handler: (ev: ArcFocusEvent) => void,
-  composed: Composable<P>,
-) => ArcScope(composed, { onOutgoing: handler });
+  composed: React.ComponentType<P>,
+) => ArcScopeWrapper(composed, { onOutgoing: handler });
 
 /**
  * Called with an IArcEvent focus is about
@@ -113,13 +129,13 @@ export const ArcOnOutgoing = <P extends {} = {}>(
  */
 export const ArcOnIncoming = <P extends {} = {}>(
   handler: (ev: ArcFocusEvent) => void,
-  composed: Composable<P>,
-) => ArcScope(composed, { onIncoming: handler });
+  composed: React.ComponentType<P>,
+) => ArcScopeWrapper(composed, { onIncoming: handler });
 
 /**
  * Triggers a focus change event.
  */
 export const ArcOnButton = <P extends {} = {}>(
   handler: (ev: ArcEvent) => void,
-  composed: Composable<P>,
-) => ArcScope(composed, { onButton: handler });
+  composed: React.ComponentType<P>,
+) => ArcScopeWrapper(composed, { onButton: handler });

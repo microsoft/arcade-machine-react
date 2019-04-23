@@ -1,16 +1,4 @@
-import { createElement } from 'react';
 import { ArcEvent } from './arc-event';
-
-/**
- * Type for elements passed into a HOC.
- */
-export type Composable<P> = React.ReactElement<any> | React.ComponentType<P>;
-
-/**
- * renderComposed can be used in render() functions to output a composed element.
- */
-export const renderComposed = <P>(composed: Composable<P>, props: P) =>
-  typeof composed === 'function' ? createElement(composed, props) : composed;
 
 /**
  * Looks for the element by its selector, if given, or returns it.

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Composable, findElement, findFocusable, renderComposed } from '../internal-types';
+import { findElement, findFocusable } from '../internal-types';
 import { instance } from '../singleton';
 
 /**
@@ -89,6 +89,10 @@ export class FocusTrap extends React.PureComponent<IFocusTrapProps> {
  * HOC to create a FocusTrap.
  */
 export const ArcFocusTrap = <P extends {} = {}>(
-  Composed: Composable<P>,
+  Composed: React.ComponentType<P>,
   focusIn?: HTMLElement | string,
-) => (props: P) => <FocusTrap focusIn={focusIn}>{renderComposed(Composed, props)}</FocusTrap>;
+) => (props: P) => (
+  <FocusTrap focusIn={focusIn}>
+    <Composed {...props} />
+  </FocusTrap>
+);

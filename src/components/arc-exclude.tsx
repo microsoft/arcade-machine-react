@@ -1,7 +1,6 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
-import { Composable, renderComposed } from '../internal-types';
 import { instance } from '../singleton';
 
 /**
@@ -67,6 +66,11 @@ export class FocusExclude extends React.PureComponent<{
 /**
  * HOC to create a FocusExclude.
  */
-export const ArcFocusExclude = <P extends {} = {}>(Composed: Composable<P>, deep?: boolean) => (
-  props: P,
-) => <FocusExclude deep={deep}>{renderComposed(Composed, props)}</FocusExclude>;
+export const ArcFocusExclude = <P extends {} = {}>(
+  Composed: React.ComponentType<P>,
+  deep?: boolean,
+) => (props: P) => (
+  <FocusExclude deep={deep}>
+    <Composed {...props} />
+  </FocusExclude>
+);

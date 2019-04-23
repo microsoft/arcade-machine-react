@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { Composable, findElement, renderComposed } from '../internal-types';
+import { findElement } from '../internal-types';
 import { instance } from '../singleton';
 
 /**
@@ -45,6 +45,10 @@ class AutoFocus extends React.PureComponent<{ selector?: string | HTMLElement }>
  * HOC for the AutoFocus component.
  */
 export const ArcAutoFocus = <P extends {} = {}>(
-  Composed: Composable<P>,
+  Composed: React.ComponentType<P>,
   selector?: string | HTMLElement,
-) => (props: P) => <AutoFocus selector={selector}>{renderComposed(Composed, props)}</AutoFocus>;
+) => (props: P) => (
+  <AutoFocus selector={selector}>
+    <Composed {...props} />
+  </AutoFocus>
+);

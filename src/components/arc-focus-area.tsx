@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Composable, findElement, findFocusable, renderComposed } from '../internal-types';
+import { findElement, findFocusable } from '../internal-types';
 import { instance } from '../singleton';
 
 /**
@@ -82,6 +82,10 @@ export class FocusArea extends React.PureComponent<{
  * HOC to create a FocusArea.
  */
 export const ArcFocusArea = <P extends {} = {}>(
-  Composed: Composable<P>,
+  Composed: React.ComponentType<P>,
   focusIn?: HTMLElement | string,
-) => (props: P) => <FocusArea focusIn={focusIn}>{renderComposed(Composed, props)}</FocusArea>;
+) => (props: P) => (
+  <FocusArea focusIn={focusIn}>
+    <Composed {...props} />
+  </FocusArea>
+);
