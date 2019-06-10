@@ -9,7 +9,7 @@ export class KeyboardInput implements IInputMethod {
   /**
    * codeToDirection returns a direction from keyCode
    */
-  public static readonly codeDirectionMap = new Map<number, Button>([
+  public static readonly defaultCodeDirectionMap = new Map<number, Button>([
     [keys.LeftArrow, Button.Left],
     [keys.GamepadLeftThumbstickLeft, Button.Left],
     [keys.GamepadDPadLeft, Button.Left],
@@ -62,7 +62,7 @@ export class KeyboardInput implements IInputMethod {
     event: Event;
   }>(
     map(event => {
-      const button = KeyboardInput.codeDirectionMap.get(event.keyCode);
+      const button = this.directionMap.get(event.keyCode);
       if (button === undefined) {
         return undefined;
       }
@@ -73,4 +73,6 @@ export class KeyboardInput implements IInputMethod {
   );
 
   public readonly isSupported = true;
+
+  constructor(private readonly directionMap = KeyboardInput.defaultCodeDirectionMap) {}
 }

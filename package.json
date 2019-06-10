@@ -14,7 +14,7 @@
     "build": "tsc && tsc -p tsconfig.cjs.json",
     "build:docs": "webpack --config docs/webpack.production.js",
     "prepare": "npm run build",
-    "lint:ts": "tslint --project tsconfig.json --fix \"src/**/*.{ts,tsx}\"",
+    "lint:ts": "tslint --project tsconfig.json --fix \"{src,docs}/**/*.{ts,tsx}\"",
     "fmt": "prettier --write \"{src,docs}/**/*.{json,ts,tsx}\" && npm run lint:ts -- --fix"
   },
   "author": "Connor Peet <connor@peet.io>",

@@ -16,7 +16,10 @@ export function isForForm(direction: Button, selected: HTMLElement | null): bool
       if (
         parent.tagName === 'FORM' ||
         parent.tagName === 'TEXTAREA' ||
-        (parent.tagName === 'INPUT' && (parent as HTMLInputElement).type !== 'button')
+        (parent.tagName === 'INPUT' &&
+          (parent as HTMLInputElement).type !== 'button' &&
+          (parent as HTMLInputElement).type !== 'checkbox' &&
+          (parent as HTMLInputElement).type !== 'radio')
       ) {
         return true;
       }

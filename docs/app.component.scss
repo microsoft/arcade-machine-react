@@ -4,14 +4,12 @@
   margin-left: 250px;
   padding: 0 8px;
 
-  p {
-    line-height: 1.5rem;
-  }
-
   p,
   blockquote,
   ul,
   ol {
+    line-height: 1.5rem;
+
     + blockquote,
     + ul,
     + ol,
@@ -57,12 +55,13 @@
     margin: 1rem 0;
     background: rgb(42, 39, 52);
     padding: 8px 0;
+    background: #eee !important;
 
     :global .token-line {
       padding: 2px 8px;
 
       &:nth-child(odd) {
-        background: rgba(#fff, 0.02);
+        background: rgba(#fff, 0.4);
       }
     }
   }

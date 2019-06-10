@@ -1,0 +1,20 @@
+.forms {
+  display: flex;
+  margin-top: 0.5rem;
+
+  label {
+    display: block;
+    font-weight: bold;
+  }
+
+  button {
+    background: #aaa;
+    padding: 8px;
+
+    &:focus {
+      background: red;
+      color: #fff;
+      outline: 0;
+    }
+  }
+}

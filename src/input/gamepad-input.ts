@@ -11,6 +11,16 @@ import { XboxGamepadWrapper } from './xbox-gamepad';
  */
 export class GamepadInput implements IInputMethod {
   /**
+   * Returns whether the Xbox virtual keyboard is visible.
+   */
+  private get keyboardVisible(): boolean {
+    if (!this.inputPane) {
+      return false;
+    }
+
+    return this.inputPane.occludedRect.y !== 0 || this.inputPane.visible;
+  }
+  /**
    * Detects any connected gamepads and watches for new ones to start
    * polling them. This is the entry point for gamepad input handling.
    */
@@ -57,16 +67,7 @@ export class GamepadInput implements IInputMethod {
     }
   })();
 
-  /**
-   * Returns whether the Xbox virtual keyboard is visible.
-   */
-  private get keyboardVisible(): boolean {
-    if (!this.inputPane) {
-      return false;
-    }
-
-    return this.inputPane.occludedRect.y !== 0 || this.inputPane.visible;
-  }
+  constructor(private readonly useUwpKeyboardMapping: boolean = true) {}
 
   private wrapGamepad(gamepad: Gamepad) {
     if (/xbox/i.test(gamepad.id)) {
@@ -88,7 +89,7 @@ export class GamepadInput implements IInputMethod {
     // The gamepadInputEmulation is a string property that exists in
     // JavaScript UWAs and in WebViews in UWAs. It won't exist in
     // Win8.1 style apps or browsers.
-    if (!('gamepadInputEmulation' in navigator)) {
+    if (this.useUwpKeyboardMapping && !('gamepadInputEmulation' in navigator)) {
       return false;
     }
 

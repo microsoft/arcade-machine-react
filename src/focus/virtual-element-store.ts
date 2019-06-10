@@ -1,5 +1,9 @@
 import { IElementStore } from '.';
 
+const defaultNeedsNativeFocus = (element: HTMLElement) => {
+  return element.tagName === 'TEXTAREA' || element.tagName === 'INPUT' || element.isContentEditable;
+};
+
 /**
  * VirtualElementStore is an IElementStore that just keeps the focused element
  * in memory, and does not use the native dom focus.
@@ -28,10 +32,7 @@ export class VirtualElementStore implements IElementStore {
 
   private previousElement: HTMLElement = document.activeElement as HTMLElement;
   private gaveNativeFocus = false;
-
-  private needsNativeFocus(element: HTMLElement) {
-    return (
-      element.tagName === 'TEXTAREA' || element.tagName === 'INPUT' || element.isContentEditable
-    );
-  }
+  constructor(
+    private readonly needsNativeFocus: (element: HTMLElement) => boolean = defaultNeedsNativeFocus,
+  ) {}
 }

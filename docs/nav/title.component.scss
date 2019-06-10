@@ -1,0 +1,14 @@
+.link {
+  display: inline-block;
+  width: 1em;
+  text-align: right;
+  margin-left: -1em;
+  text-decoration: none;
+  color: #ccc;
+  position: relative;
+  z-index: 1;
+
+  &:hover {
+    color: #000;
+  }
+}

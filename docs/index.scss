@@ -1,14 +1,11 @@
 $font-prefix: '../node_modules/@ibm/plex/';
 
-@import '../node_modules/@ibm/plex/scss/mono/regular/latin1';
-@import '../node_modules/@ibm/plex/scss/mono/bold/latin1';
 @import '../node_modules/@ibm/plex/scss/serif/semibold/latin1';
 @import '../node_modules/@ibm/plex/scss/sans/regular/latin1';
 
 :root {
   --font-family-sans: 'IBM Plex Sans', sans-serif;
   --font-family-serif: 'IBM Plex Serif', serif;
-  --font-family-mono: 'IBM Plex Mono', monospace;
 }
 
 * {
@@ -35,6 +32,15 @@ h2 {
   font-size: 2rem;
 }
 
-pre, code {
-  font-family: var(--font-family-mono);
+code {
+  font-family: var(--font-family-serif);
+}
+
+pre {
+  font-family: monospace;
+}
+
+.arc-selected {
+  background: red !important;
+  color: #fff;
 }

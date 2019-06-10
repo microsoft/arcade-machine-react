@@ -10,9 +10,7 @@ const SidebarNode: React.FC<{ node: NavNode<any>; active: string | null }> = ({ 
 
   return (
     <>
-      <Reference className={active === link ? styles.active : undefined} node={node}>
-        {title}
-      </Reference>
+      <Reference className={active === link ? styles.active : undefined} node={node} />
       {childKeys.length > 0 && (
         <ol>
           {childKeys.map(key => (

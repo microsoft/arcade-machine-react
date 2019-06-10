@@ -22,7 +22,7 @@ function isArcScope(type: any): type is IArcScopeClass<any> {
 /**
  * A "scope" upon which event handlers can be attached.
  */
-export class ArcScope extends React.PureComponent<Partial<IArcHandler>> {
+export class Scope extends React.PureComponent<Partial<IArcHandler>> {
   /**
    * The node this element is attached to.
    */
@@ -78,13 +78,18 @@ export const ArcScopeWrapper = <P extends {} = {}>(
 
     public render() {
       return React.createElement(
-        ArcScope,
+        Scope,
         ArcScopeComponent.options,
         React.createElement(Composed, this.props),
       );
     }
   };
 };
+
+/**
+ * @deprecated Use <Scope /> instead.
+ */
+export const ArcScope = Scope;
 
 /**
  * Overrides the element focused when going up from this element.

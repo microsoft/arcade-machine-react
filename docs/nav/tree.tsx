@@ -47,7 +47,10 @@ export const nav = <T extends { [key: string]: NavNode<any> }>(
 ): NavNode<T> =>
   increaseDepth<T>({
     title,
-    link: title.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+    link: title
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, '-')
+      .replace(/^-+|-+$/g, ''),
     depth: 0,
     ...children,
   } as NavNode<T>);
@@ -58,6 +61,6 @@ export const Reference: React.FC<{ node: NavNode<any>; className?: string }> = (
   children,
 }) => (
   <a className={className} href={`#${node.link}`}>
-    {children}
+    {children || node.title}
   </a>
 );

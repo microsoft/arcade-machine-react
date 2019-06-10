@@ -166,8 +166,15 @@ export class FocusService {
     if (ev instanceof ArcFocusEvent && ev.next !== null) {
       this.selectNode(ev.next);
       return true;
-    } else if (ev.event === Button.Submit) {
-      this.elementStore.element.click();
+    }
+
+    if (ev.event === Button.Submit) {
+      const element = this.elementStore.element;
+      if (element instanceof HTMLInputElement && element.type === 'checkbox') {
+        element.checked = !element.checked;
+      } else {
+        element.click();
+      }
       return true;
     }
 
