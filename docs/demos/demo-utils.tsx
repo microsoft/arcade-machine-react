@@ -15,7 +15,7 @@ export const basicGrid = (width: number, height: number) => (
     {repeat(height, i => (
       <div className={styles.row} key={i}>
         {repeat(width, k => (
-          <div className={styles.box} key={k} tabIndex={0} />
+          <div className={styles.box} data-box={`${k} ${i}`} key={k} tabIndex={0} />
         ))}
       </div>
     ))}

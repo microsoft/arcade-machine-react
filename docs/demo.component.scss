@@ -32,6 +32,17 @@
   display: flex;
   align-items: center;
   justify-content: center;
+
+  button {
+    background: #aaa;
+    padding: 8px;
+
+    &:focus {
+      background: red;
+      color: #fff;
+      outline: 0;
+    }
+  }
 }
 
 .demoHidden {

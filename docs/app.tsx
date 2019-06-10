@@ -5,6 +5,7 @@ import { nav, Reference } from './nav/tree';
 import { Title } from './nav/title';
 import { Sidebar } from './nav/sidebar';
 import { Highlighted } from './highlighted';
+import GithubCorner from 'react-github-corner';
 
 const navigation = nav('arcade-machine-react', {
   basics: nav('The Basics', {
@@ -15,6 +16,9 @@ const navigation = nav('arcade-machine-react', {
     scrolling: nav('Scrolling Configuration'),
     store: nav('Element Store Configuration'),
     focus: nav('Focus Strategy Configuration'),
+  }),
+  autofocus: nav('<Autofocus />', {
+    demo: nav('Demo: Autofocus'),
   }),
   handlers: nav('<Scope />', {
     demo: nav('Demo: Set Next Elements'),
@@ -32,11 +36,13 @@ const navigation = nav('arcade-machine-react', {
     demo: nav('Demo: Scrolling'),
   }),
   forms: nav('Forms'),
+  benchmarks: nav('Benchmarks'),
   faq: nav('FAQ'),
 });
 
 export const App: React.FC = () => (
   <>
+    <GithubCorner href="https://github.com/mixer/arcade-machine-react" />
     <Sidebar node={navigation} />
     <div className={styles.demo}>
       <Title node={navigation} />
@@ -117,7 +123,7 @@ export function defaultOptions(): IRootOptions {
           <a href="https://developer.mozilla.org/en-US/docs/Web/API/Gamepad_API/Using_the_Gamepad_API">
             HTML5 Gamepad API
           </a>{' '}
-          if available, polling for input data and translating those into button presses.Note that
+          if available, polling for input data and translating those into button presses. Note that
           in the case of UWPs, we will attempt to activate <code>gamepadInputEmulation</code> to
           have the platform give us events more efficiently. However, you can disable this by
           providing <code>false</code> as the first argument to the constructor
@@ -160,7 +166,7 @@ export function defaultOptions(): IRootOptions {
         The virtual store is different. We'll only actually give focus to elements that require it
         (form inputs and content editable), though this is configurable. Instead, we'll only record
         the change of focus internally, and apply the class <code>arc-selected</code> to any element
-        that's currently in focus. However, this comes at the cost of complexity and possbile
+        that's currently in focus. However, this comes at the cost of complexity and possible
         accessibility considerations--although both are solvable, as we've done in the Mixer Xbox
         app.
       </p>
@@ -211,7 +217,45 @@ export function defaultOptions(): IRootOptions {
           </a>{' '}
           algorithm.
         </li>
+        <li>
+          <code>FocusByRaycast()</code>: this is not enabled by default. It's an algorithm that uses{' '}
+          <a href="https://developer.mozilla.org/en-US/docs/Web/API/DocumentOrShadowRoot/elementFromPoint">
+            elementFromPoint
+          </a>{' '}
+          to raycast out from the edge of the currently selected element. This is very efficient,
+          but may not always find the optimal element in all cases.
+        </li>
       </ol>
+      <Title node={navigation.autofocus} />
+      <p>
+        The autofocus component transfers focus to one of its child elements as soon as it's
+        created. You can provide a <code>target</code>, either a selector string or an element,
+        which should be focused. If none is provided, it'll focus the first selectable child it
+        finds.
+      </p>
+      <table className={styles.table}>
+        <tbody>
+          <tr>
+            <td>
+              <code>target</code>
+            </td>
+            <td>
+              <code>undefined | string | HTMLElement</code>
+            </td>
+            <td>
+              Element or selector to give focus to. If not provided, the first focusable child will
+              be selected.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <Title node={navigation.autofocus.demo} />
+      <p>
+        In this example, we autofocus on the second box in the second column. You can toggle whether
+        the autofocus area is visible, and observe the focus being transferred when the autofocus
+        component appears.
+      </p>
+      <Demo name="autofocus" />
       <Title node={navigation.handlers} />
       <p>
         You can handle focus events using <code>{'<Scope />'}</code>. You can specify elements that
@@ -307,8 +351,8 @@ export function defaultOptions(): IRootOptions {
       <Title node={navigation.handlers.demo} />
       <p>
         Here's an example of using overriding the "next" element. On these boxes, pressing up/down
-        will instead focus on adjact boxes. Normally, if no focusable element can be found next, it
-        would do nothing.
+        will instead focus on adjacent boxes. By default, if no focusable element can be found after
+        a key press, nothing would happen.
       </p>
       <Demo name="scope-override-focus" />
       <Title node={navigation.focusTraps} />
@@ -380,8 +424,8 @@ export function defaultOptions(): IRootOptions {
       <Title node={navigation.focusExclude} />
       <p>
         Focus exclusion areas can prevent their contents from being focused on. Simple enough. Good
-        if you have content that's loading in or simply disabled. By default, it'll only exclude its
-        direct child node, and it will prevent the entire subtree from being focused on if{' '}
+        if you have content that's loading in or disabled. By default, it'll only exclude its direct
+        child node, and it will prevent the entire subtree from being focused on if{' '}
         <code>deep</code> is set.
       </p>
       <table className={styles.table}>
@@ -456,6 +500,25 @@ export function defaultOptions(): IRootOptions {
         using the virtual element store.
       </p>
       <Demo name="forms" />
+      <Title node={navigation.benchmarks} />
+      <p>
+        The first benchmark here is the base case, manually calling <code>.focus()</code> on an
+        element in the DOM without arcade-machine. The subsequent benchmarks are various
+        arcade-machine scenarios, where we fake button presses and bubble through the full stack.
+      </p>
+      <ul>
+        <li>
+          On Chrome arcade machine has been seen to offer performance close to (within 0.7-1x) base
+          when using the native store, and faster (1-3x) when using the virtual store.
+        </li>
+        <li>
+          For UWPs/Edge, its JavaScript engine is fast for our scenario, but its native browser{' '}
+          <code>.focus()</code> is slower than Chrome. Using the native store in arcade-machine is
+          on-par with not using arcade-machine at all, and using the virtual store is reliabily much
+          faster (around 3x) than the former scenarios browser focus.
+        </li>
+      </ul>
+      <Demo name="benchmarks" />
       <Title node={navigation.faq} />
       <dl>
         <dt>

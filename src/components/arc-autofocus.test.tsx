@@ -6,7 +6,9 @@ import { instance } from '../singleton';
 import { ArcAutoFocus } from './arc-autofocus';
 import { mountToDOM } from './util.test';
 
-const NormalInput = (props: { className: string }) => <input className={props.className} />;
+const NormalInput = (props: { className: string }) => (
+  <input tabIndex={0} className={props.className} />
+);
 const FocusedInput = ArcAutoFocus(NormalInput);
 
 describe('ArcAutoFocus', () => {
@@ -17,7 +19,7 @@ describe('ArcAutoFocus', () => {
   });
 
   it('focuses the first html element', async () => {
-    const cmp = mountToDOM(
+    mountToDOM(
       <div>
         <NormalInput className="not-focused" />
         <FocusedInput className="focused" />
@@ -25,7 +27,6 @@ describe('ArcAutoFocus', () => {
     );
 
     expect(document.activeElement!.className).to.deep.equal('focused');
-    cmp.unmount();
   });
 
   it('focuses via selector', () => {
@@ -38,12 +39,11 @@ describe('ArcAutoFocus', () => {
       ),
       '.focused',
     );
-    const cmp = mountToDOM(
+    mountToDOM(
       <div>
         <Fixture />
       </div>,
     );
     expect(document.activeElement!.className).to.deep.equal('focused');
-    cmp.unmount();
   });
 });

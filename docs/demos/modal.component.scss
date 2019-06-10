@@ -2,17 +2,6 @@
   position: relative;
   width: 500px;
   height: 300px;
-
-  button {
-    background: #aaa;
-    padding: 8px;
-
-    &:focus {
-      background: red;
-      color: #fff;
-      outline: 0;
-    }
-  }
 }
 
 .modal {

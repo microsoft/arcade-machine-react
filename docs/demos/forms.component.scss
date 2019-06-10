@@ -6,15 +6,4 @@
     display: block;
     font-weight: bold;
   }
-
-  button {
-    background: #aaa;
-    padding: 8px;
-
-    &:focus {
-      background: red;
-      color: #fff;
-      outline: 0;
-    }
-  }
 }

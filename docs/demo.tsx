@@ -24,13 +24,20 @@ let hidePrevious: (() => void) | undefined;
 
 export class Demo extends React.PureComponent<IProps, IState> {
   public state: IState = { tab: Tab.DemoHidden };
+  private observer?: IntersectionObserver;
+
+  public componentWillUnmount() {
+    if (this.observer) {
+      this.observer.disconnect();
+    }
+  }
 
   public render() {
     const { default: Component } = require(`./demos/${this.props.name}`);
     const { default: source } = require(`!!raw-loader!./demos/${this.props.name}`);
 
     return (
-      <div className={styles.wrapper}>
+      <div className={styles.wrapper} ref={this.setWrapper}>
         <ol className={styles.tabs}>
           <li
             className={this.state.tab !== Tab.Code ? styles.active : undefined}
@@ -63,6 +70,19 @@ export class Demo extends React.PureComponent<IProps, IState> {
       </div>
     );
   }
+
+  private readonly setWrapper = (element: HTMLDivElement) => {
+    this.observer = new IntersectionObserver(
+      updates => {
+        if (this.state.tab === Tab.DemoHidden && updates.some(u => u.isIntersecting)) {
+          this.openDemo();
+        }
+      },
+      { threshold: 0.75 },
+    );
+
+    this.observer.observe(element);
+  };
 
   private readonly hideDemo = () => {
     this.setState({ tab: Tab.DemoHidden });

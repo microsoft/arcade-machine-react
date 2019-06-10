@@ -223,6 +223,10 @@ export class FocusService {
    * Reset the focus if arcade-machine wanders out of root
    */
   public setDefaultFocus() {
+    if (this.root.element.contains(this.elementStore.element)) {
+      return;
+    }
+
     const focusableElems = this.root.element.querySelectorAll('[tabIndex]');
 
     // tslint:disable-next-line

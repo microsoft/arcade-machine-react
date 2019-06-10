@@ -4,11 +4,9 @@ import { ArcEvent } from './arc-event';
  * Looks for the element by its selector, if given, or returns it.
  */
 export const findElement = (container: HTMLElement, target?: string | HTMLElement) =>
-  target
-    ? typeof target === 'string'
-      ? (container.querySelector(target) as HTMLElement | null)
-      : target
-    : null;
+  typeof target === 'string'
+    ? (container.querySelector(target) as HTMLElement | null)
+    : target || null;
 
 /**
  * Returns the focusable element in the container, optionally filtering

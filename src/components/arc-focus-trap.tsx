@@ -28,7 +28,9 @@ export interface IFocusTrapProps {
  *   <MyContent />
  * </FocusTrap>
  */
-export class FocusTrap extends React.PureComponent<IFocusTrapProps> {
+export class FocusTrap extends React.PureComponent<
+  IFocusTrapProps & React.HTMLAttributes<HTMLDivElement>
+> {
   private containerRef = React.createRef<HTMLDivElement>();
   private previouslyFocusedElement!: HTMLElement;
 
@@ -74,8 +76,9 @@ export class FocusTrap extends React.PureComponent<IFocusTrapProps> {
   }
 
   public render() {
+    const { children, focusIn, focusOut, ...htmlProps } = this.props;
     return (
-      <div className="arc-focus-trap" tabIndex={0} ref={this.containerRef}>
+      <div ref={this.containerRef} {...htmlProps}>
         {this.props.children}
       </div>
     );

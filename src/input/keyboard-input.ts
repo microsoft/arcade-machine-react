@@ -3,7 +3,7 @@ import { filter, map } from 'rxjs/operators';
 import { keys } from 'uwp-keycodes';
 
 import { Button } from '../model';
-import { IInputMethod } from './input-method';
+import { IInputMethod, IInputObservation } from './input-method';
 
 export class KeyboardInput implements IInputMethod {
   /**
@@ -57,19 +57,16 @@ export class KeyboardInput implements IInputMethod {
     [keys.GamepadMenu, Button.Menu],
   ]);
 
-  public readonly observe = fromEvent<KeyboardEvent>(window, 'keydown').pipe<{
-    button: Button;
-    event: Event;
-  }>(
+  public readonly observe = fromEvent<KeyboardEvent>(window, 'keydown').pipe(
     map(event => {
       const button = this.directionMap.get(event.keyCode);
       if (button === undefined) {
-        return undefined;
+        return undefined as unknown;
       }
 
       return { button, event };
     }),
-    filter(ev => ev !== undefined),
+    filter((ev): ev is IInputObservation => ev !== undefined),
   );
 
   public readonly isSupported = true;

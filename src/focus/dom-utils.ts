@@ -36,8 +36,10 @@ export function isVisible(element: HTMLElement | null): boolean {
 /**
  * Returns if the element can receive focus.
  */
-export function isFocusable(el: HTMLElement): boolean {
-  const activeElement = instance.getServices().elementStore.element;
+export function isFocusable(
+  el: HTMLElement,
+  activeElement = instance.getServices().elementStore.element,
+): boolean {
   if (el === activeElement) {
     return false;
   }

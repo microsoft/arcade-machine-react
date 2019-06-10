@@ -21,9 +21,13 @@ export function mountToDOM(element: React.ReactElement<any>) {
   return wrapper;
 }
 
-afterEach(() => {
+export function unmountAll() {
   mountings.forEach(m => m.unmount());
   mountings = [];
+}
+
+afterEach(() => {
+  unmountAll();
   instance.setServices(undefined);
 });
 

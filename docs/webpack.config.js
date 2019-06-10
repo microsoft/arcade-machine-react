@@ -60,6 +60,9 @@ module.exports = {
       },
     ],
   },
+  devServer: {
+    disableHostCheck: true,
+  },
   plugins: [
     new HtmlWebpackPlugin({
       title: 'Arcade Machine Documentation',

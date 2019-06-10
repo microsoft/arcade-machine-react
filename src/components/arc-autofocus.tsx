@@ -1,6 +1,5 @@
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
-import { findElement } from '../internal-types';
+import { findFocusable } from '../internal-types';
 import { instance } from '../singleton';
 
 /**
@@ -14,30 +13,31 @@ import { instance } from '../singleton';
  * usually focusable, however.
  *
  * @example
- * const box = ArcAutoFocus(<div class="myBox" tabIndex={0}>)
+ * <AutoFocus><div class="myBox" tabIndex={0} /></AutoFocus>
+ * <AutoFocus target='.my-node'>{contents}</AutoFocus>
+ * <AutoFocus target={someHtmlElement}>{contents}</AutoFocus>
  */
-class AutoFocus extends React.PureComponent<{ selector?: string | HTMLElement }> {
+export class AutoFocus extends React.PureComponent<
+  { target?: string | HTMLElement; selector?: string | HTMLElement } & React.HTMLAttributes<
+    HTMLDivElement
+  >
+> {
+  private readonly container = React.createRef<HTMLDivElement>();
+
   public componentDidMount() {
-    const node = ReactDOM.findDOMNode(this);
+    const node = this.container.current;
     if (!(node instanceof HTMLElement)) {
       return;
     }
-    let focusTarget: Element | null = null;
-    if (this.props.selector) {
-      focusTarget = findElement(node, this.props.selector);
-    } else if (node.children.length) {
-      focusTarget = node.children[0];
-    } else {
-      focusTarget = node;
-    }
 
+    const focusTarget = findFocusable(node, this.props.target);
     if (focusTarget) {
-      instance.getServices().elementStore.element = focusTarget as HTMLElement;
+      instance.getServices().elementStore.element = focusTarget;
     }
   }
 
   public render() {
-    return this.props.children;
+    return <div ref={this.container}>{this.props.children}</div>;
   }
 }
 
@@ -46,9 +46,9 @@ class AutoFocus extends React.PureComponent<{ selector?: string | HTMLElement }>
  */
 export const ArcAutoFocus = <P extends {} = {}>(
   Composed: React.ComponentType<P>,
-  selector?: string | HTMLElement,
+  target?: string | HTMLElement,
 ) => (props: P) => (
-  <AutoFocus selector={selector}>
+  <AutoFocus target={target}>
     <Composed {...props} />
   </AutoFocus>
 );

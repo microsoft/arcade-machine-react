@@ -40,7 +40,7 @@ describe('ArcFocusArea', () => {
   };
 
   it('focuses the first focusable element by default', () => {
-    const { contents, record, element } = render();
+    const { record, element } = render();
 
     const event = new ArcFocusEvent({
       context: new NoopFocusContext(),
@@ -53,11 +53,10 @@ describe('ArcFocusArea', () => {
     record.onIncoming!(event);
 
     expect(event.next!.className).to.equal('b');
-    contents.unmount();
   });
 
   it('overrides focusable by a query', () => {
-    const { contents, record, element } = render('.c');
+    const { record, element } = render('.c');
 
     const event = new ArcFocusEvent({
       context: new NoopFocusContext(),
@@ -70,11 +69,10 @@ describe('ArcFocusArea', () => {
     record.onIncoming!(event);
 
     expect(event.next!.className).to.equal('c');
-    contents.unmount();
   });
 
   it('does not intercept focus events inside the element', () => {
-    const { contents, record, element } = render();
+    const { record, element } = render();
 
     const event = new ArcFocusEvent({
       context: new NoopFocusContext(),
@@ -87,6 +85,5 @@ describe('ArcFocusArea', () => {
     record.onIncoming!(event);
 
     expect(event.next!.className).to.equal('c');
-    contents.unmount();
   });
 });

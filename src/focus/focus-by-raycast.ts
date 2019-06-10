@@ -65,7 +65,7 @@ export class FocusByRaycastStrategy implements IFocusStrategy {
         continue;
       }
 
-      if (!isNodeAttached(el, root) || !isFocusable(el)) {
+      if (!isNodeAttached(el, root) || !isFocusable(el, activeElement)) {
         continue;
       }
 
