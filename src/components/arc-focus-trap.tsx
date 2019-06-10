@@ -51,29 +51,26 @@ export class FocusTrap extends React.PureComponent<IFocusTrapProps> {
       }
     });
 
-    instance.getServices().stateContainer.add(this, {
-      element,
-      onOutgoing: ev => {
-        if (ev.next && !element.contains(ev.next)) {
-          ev.preventDefault();
-        }
-      },
-    });
+    instance.getServices().root.narrow(element);
   }
 
   public componentWillUnmount() {
-    const { stateContainer, elementStore } = instance.getServices();
-    stateContainer.remove(this, this.containerRef.current!);
+    const services = instance.maybeGetServices();
+    if (!services) {
+      return;
+    }
+
+    services.root.restore(this.containerRef.current!);
 
     if (this.props.focusOut) {
       const target = findElement(document.body, this.props.focusOut);
       if (target) {
-        elementStore.element = target;
+        services.elementStore.element = target;
         return;
       }
     }
 
-    elementStore.element = this.previouslyFocusedElement;
+    services.elementStore.element = this.previouslyFocusedElement;
   }
 
   public render() {

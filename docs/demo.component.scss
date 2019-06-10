@@ -1,0 +1,48 @@
+.wrapper {
+  margin-top: 1rem;
+  background: #eee;
+}
+
+.tabs {
+  display: flex;
+
+  li {
+    list-style-type: none;
+    margin: 0;
+    padding: 0.75rem 2rem;
+    color: #666;
+    font-size: 0.9rem;
+    cursor: pointer;
+
+    &.active {
+      background: #ccc;
+      color: #000;
+    }
+  }
+}
+
+.code,
+.demo,
+.demoHidden {
+  height: 500px;
+  overflow-y: auto;
+}
+
+.demo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.demoHidden {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2em;
+  cursor: pointer;
+  color: #aaa;
+}
+
+.code :global .prism-code {
+  margin: 0;
+}

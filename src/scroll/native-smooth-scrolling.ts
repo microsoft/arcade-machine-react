@@ -15,8 +15,9 @@ export class NativeSmoothScrollingAlgorithm implements IScrollingAlgorithm {
     targetElement: HTMLElement,
     rect: ClientRect,
   ): void {
-    const horizontal = horizontalDelta(rect);
-    const vertical = verticalDelta(rect);
+    const reference = parent.element.getBoundingClientRect();
+    const horizontal = horizontalDelta(rect, reference);
+    const vertical = verticalDelta(rect, reference);
 
     try {
       if (parent.vertical && vertical) {

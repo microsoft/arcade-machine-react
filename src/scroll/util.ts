@@ -2,11 +2,11 @@
  * Returns the difference the page has to be moved horizontall to bring
  * the target rect into view.
  */
-export function horizontalDelta(rect: ClientRect) {
-  return rect.left < 0
-    ? rect.left
-    : rect.right > window.innerWidth
-    ? rect.right - window.innerWidth
+export function horizontalDelta(rect: ClientRect, reference: ClientRect) {
+  return rect.left < reference.left
+    ? rect.left - reference.left
+    : rect.right > reference.right
+    ? rect.right - reference.right
     : 0;
 }
 
@@ -14,10 +14,10 @@ export function horizontalDelta(rect: ClientRect) {
  * Returns the difference the page has to be moved vertically to bring
  * the target rect into view.
  */
-export function verticalDelta(rect: ClientRect) {
-  return rect.top < 0
-    ? rect.top
-    : rect.bottom > window.innerHeight
-    ? rect.bottom - window.innerHeight
+export function verticalDelta(rect: ClientRect, reference: ClientRect) {
+  return rect.top < reference.top
+    ? rect.top - reference.top
+    : rect.bottom > reference.bottom
+    ? rect.bottom - reference.bottom
     : 0;
 }

@@ -39,7 +39,10 @@ export class ArcScope extends React.PureComponent<Partial<IArcHandler>> {
   }
 
   public componentWillUnmount() {
-    instance.getServices().stateContainer.remove(this, this.node);
+    const services = instance.maybeGetServices();
+    if (services) {
+      services.stateContainer.remove(this, this.node);
+    }
   }
 
   public render() {

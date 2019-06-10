@@ -27,14 +27,15 @@ export class ScrollExecutor {
    * are computed and passed into it.
    */
   public scrollTo(targetElement: HTMLElement, referenceRect: ClientRect) {
-    const horizontal = referenceRect.left < 0 || referenceRect.right > window.innerWidth;
-    if (!horizontal && referenceRect.top >= 0 && referenceRect.bottom < window.innerHeight) {
-      return;
+    let parent: Readonly<IScrollableContainer> | undefined;
+    for (const candidate of this.registry.getScrollContainers()) {
+      if (candidate.element.contains(targetElement)) {
+        if (!parent || parent.element.contains(candidate.element)) {
+          parent = candidate;
+        }
+      }
     }
 
-    const parent = this.registry
-      .getScrollContainers()
-      .find(({ element }) => element.contains(targetElement));
     if (!parent) {
       return;
     }

@@ -1,0 +1,30 @@
+.sidebar {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  width: 250px;
+  font-size: 0.8em;
+
+  ol {
+    margin-left: 0.5rem;
+  }
+
+  li {
+    list-style-type: none;
+  }
+
+  a {
+    color: #000;
+    text-decoration: none;
+    display: inline-block;
+    margin: 0.5rem 0;
+
+    &:hover {
+      color: #666;
+    }
+
+    &.active {
+      font-weight: bold;
+    }
+  }
+}

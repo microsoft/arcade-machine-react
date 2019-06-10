@@ -59,9 +59,10 @@ export class SmoothScrollingAlgorithm implements IScrollingAlgorithm {
       requestAnimationFrame(run);
     };
 
+    const reference = parent.element.getBoundingClientRect();
     if (parent.horizontal) {
       animate(
-        horizontalDelta(referenceRect),
+        horizontalDelta(referenceRect, reference),
         parent.element.scrollLeft,
         x => (parent.element.scrollLeft = x),
       );
@@ -69,7 +70,7 @@ export class SmoothScrollingAlgorithm implements IScrollingAlgorithm {
 
     if (parent.vertical) {
       animate(
-        verticalDelta(referenceRect),
+        verticalDelta(referenceRect, reference),
         parent.element.scrollTop,
         x => (parent.element.scrollTop = x),
       );

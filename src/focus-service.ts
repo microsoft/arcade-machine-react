@@ -1,10 +1,11 @@
 import { ArcEvent } from './arc-event';
 import { ArcFocusEvent } from './arc-focus-event';
 import { FocusContext, IElementStore, IFocusStrategy } from './focus';
-import { isFocusable, isNodeAttached, roundRect } from './focus/dom-utils';
+import { isFocusable, roundRect } from './focus/dom-utils';
 import { isForForm } from './focus/is-for-form';
 import { propogationStoped, resetEvent } from './internal-types';
 import { Button, IArcHandler, isDirectional } from './model';
+import { RootStore } from './root-store';
 import { ScrollExecutor } from './scroll';
 import { StateContainer } from './state/state-container';
 
@@ -33,7 +34,7 @@ export class FocusService {
 
   constructor(
     private readonly registry: StateContainer,
-    private readonly root: HTMLElement,
+    private readonly root: RootStore,
     private readonly strategies: IFocusStrategy[],
     private readonly elementStore: IElementStore,
     private readonly scroller: ScrollExecutor,
@@ -45,7 +46,7 @@ export class FocusService {
    * Wrapper around moveFocus to dispatch arcselectingnode event
    */
   public selectNode(next: HTMLElement) {
-    if (!this.root.contains(next)) {
+    if (!this.root.element.contains(next)) {
       return;
     }
 
@@ -118,11 +119,11 @@ export class FocusService {
       });
     }
 
-    const context = new FocusContext(this.root, direction, this.strategies, {
+    const context = new FocusContext(this.root.element, direction, this.strategies, {
       activeElement: selected,
       directive: this.registry.find(selected),
       previousElement: this.previousSelectedElement,
-      referenceRect: this.root.contains(selected)
+      referenceRect: this.root.element.contains(selected)
         ? selected.getBoundingClientRect()
         : this.referenceRect,
     });
@@ -131,7 +132,7 @@ export class FocusService {
       context,
       directive: this.registry.find(selected),
       event: direction,
-      next: context ? context.find(this.root) : null,
+      next: context ? context.find(this.root.element) : null,
       target: selected,
     });
   }
@@ -142,9 +143,7 @@ export class FocusService {
    */
   private bubbleInOut(ev: ArcFocusEvent, selected: HTMLElement): boolean {
     const originalNext = ev.next;
-    if (isNodeAttached(selected, this.root)) {
-      this.bubbleEvent(ev, 'onOutgoing', selected);
-    }
+    this.bubbleEvent(ev, 'onOutgoing', selected);
 
     // Abort if the user handled
     if (ev.defaultPrevented || originalNext !== ev.next) {
@@ -184,7 +183,11 @@ export class FocusService {
     trigger: keyof IArcHandler,
     source: HTMLElement | null,
   ): ArcEvent {
-    for (let el = source; !propogationStoped(ev) && el !== this.root && el; el = el.parentElement) {
+    for (
+      let el = source;
+      !propogationStoped(ev) && el !== this.root.element && el;
+      el = el.parentElement
+    ) {
       if (el === undefined) {
         // tslint:disable-next-line
         console.warn(
@@ -212,8 +215,8 @@ export class FocusService {
   /**
    * Reset the focus if arcade-machine wanders out of root
    */
-  private setDefaultFocus() {
-    const focusableElems = this.root.querySelectorAll('[tabIndex]');
+  public setDefaultFocus() {
+    const focusableElems = this.root.element.querySelectorAll('[tabIndex]');
 
     // tslint:disable-next-line
     for (let i = 0; i < focusableElems.length; i += 1) {

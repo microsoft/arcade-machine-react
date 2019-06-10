@@ -1,0 +1,79 @@
+.demo {
+  max-width: 1280px;
+  margin: 50px;
+  margin-left: 250px;
+  padding: 0 8px;
+
+  p {
+    line-height: 1.5rem;
+  }
+
+  p,
+  blockquote,
+  ul,
+  ol {
+    + blockquote,
+    + ul,
+    + ol,
+    + p {
+      margin-top: 1rem;
+    }
+  }
+
+  li {
+    margin: 0.5em 0;
+
+    ul,
+    ol {
+      margin: 0 2rem;
+    }
+  }
+
+  hr {
+    height: 1px;
+    border: none;
+    color: #ccc;
+    background-color: #ccc;
+    margin: 2em 0;
+  }
+
+  blockquote {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background: rgba(0, 0, 0, 0.05);
+    border-left: 2px solid #ccc;
+  }
+
+  dt {
+    font-weight: bold;
+    margin-bottom: 1rem;
+  }
+
+  dd {
+    margin-bottom: 2rem;
+  }
+
+  :global .prism-code {
+    margin: 1rem 0;
+    background: rgb(42, 39, 52);
+    padding: 8px 0;
+
+    :global .token-line {
+      padding: 2px 8px;
+
+      &:nth-child(odd) {
+        background: rgba(#fff, 0.02);
+      }
+    }
+  }
+}
+
+.table {
+  margin: 1rem 0;
+  border-collapse: collapse;
+
+  td {
+    border: 1px solid #ccc;
+    padding: 4px;
+  }
+}

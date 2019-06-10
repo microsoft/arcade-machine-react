@@ -9,6 +9,7 @@ import { instance } from '../singleton';
  */
 export class FocusExclude extends React.PureComponent<{
   children: React.ReactNode;
+  active?: boolean;
   deep?: boolean;
 }> {
   /**
@@ -27,7 +28,7 @@ export class FocusExclude extends React.PureComponent<{
     instance.getServices().stateContainer.add(this, {
       element,
       onIncoming: ev => {
-        if (!ev.next) {
+        if (!ev.next || this.props.active === false) {
           return;
         }
 
@@ -43,7 +44,10 @@ export class FocusExclude extends React.PureComponent<{
   }
 
   public componentWillUnmount() {
-    instance.getServices().stateContainer.remove(this, this.node);
+    const services = instance.maybeGetServices();
+    if (services) {
+      services.stateContainer.remove(this, this.node);
+    }
   }
 
   public render() {

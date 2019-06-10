@@ -2,6 +2,11 @@ import * as React from 'react';
 import { findElement, findFocusable } from '../internal-types';
 import { instance } from '../singleton';
 
+export type FocusAreaProps = {
+  children: React.ReactNode;
+  focusIn?: HTMLElement | string;
+} & React.HTMLAttributes<HTMLDivElement>;
+
 /**
  * The ArcFocusArea acts as a virtual focus element which transfers focus
  * to child. Take, for example, a list of lists, like this:
@@ -37,10 +42,7 @@ import { instance } from '../singleton';
  *   {myContent.map(content => <ContentElement data={content} />)}
  * </FocusArea>
  */
-export class FocusArea extends React.PureComponent<{
-  children: React.ReactNode;
-  focusIn?: HTMLElement | string;
-}> {
+export class FocusArea extends React.PureComponent<FocusAreaProps> {
   private containerRef = React.createRef<HTMLDivElement>();
 
   public componentDidMount() {
@@ -66,12 +68,17 @@ export class FocusArea extends React.PureComponent<{
   }
 
   public componentWillUnmount() {
-    instance.getServices().stateContainer.remove(this, this.containerRef.current!);
+    const services = instance.maybeGetServices();
+    if (services && this.containerRef.current) {
+      services.stateContainer.remove(this, this.containerRef.current);
+    }
   }
 
   public render() {
+    const { children, focusIn, ...htmlProps } = this.props;
+
     return (
-      <div tabIndex={0} ref={this.containerRef}>
+      <div tabIndex={0} {...htmlProps} ref={this.containerRef}>
         {this.props.children}
       </div>
     );

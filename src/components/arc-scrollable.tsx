@@ -10,8 +10,8 @@ import { instance } from '../singleton';
  */
 export class Scrollable extends React.PureComponent<{
   children: React.ReactNode;
-  horizontal: boolean;
-  vertical: boolean;
+  horizontal?: boolean;
+  vertical?: boolean;
 }> {
   /**
    * The node this element is attached to.
@@ -29,13 +29,16 @@ export class Scrollable extends React.PureComponent<{
     this.node = element;
     instance.getServices().scrollRegistry.add({
       element,
-      horizontal: this.props.horizontal,
-      vertical: this.props.vertical,
+      horizontal: this.props.horizontal === true,
+      vertical: this.props.vertical !== false,
     });
   }
 
   public componentWillUnmount() {
-    instance.getServices().scrollRegistry.remove(this.node);
+    const services = instance.maybeGetServices();
+    if (services) {
+      services.scrollRegistry.remove(this.node);
+    }
   }
 
   public render() {

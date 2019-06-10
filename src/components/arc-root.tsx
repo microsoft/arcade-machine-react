@@ -11,6 +11,7 @@ import { InputService } from '../input';
 import { GamepadInput } from '../input/gamepad-input';
 import { IInputMethod } from '../input/input-method';
 import { KeyboardInput } from '../input/keyboard-input';
+import { RootStore } from '../root-store';
 import { IScrollingAlgorithm, ScrollExecutor } from '../scroll';
 import { NativeSmoothScrollingAlgorithm } from '../scroll/native-smooth-scrolling';
 import { ScrollRegistry } from '../scroll/scroll-registry';
@@ -44,6 +45,10 @@ export function defaultOptions(): IRootOptions {
   };
 }
 
+interface IState {
+  showChildren: boolean;
+}
+
 /**
  * Component for defining the root of the arcade-machine. This should be wrapped
  * around the root of your application, or its content. Only components
@@ -57,37 +62,21 @@ export function defaultOptions(): IRootOptions {
  *
  * export default ArcRoot(MyAppContent);
  */
-class Root extends React.PureComponent<IRootOptions> {
+export class Root extends React.PureComponent<IRootOptions, IState> {
+  public state = { showChildren: false };
+  private focus?: FocusService;
   private stateContainer = new StateContainer();
   private scrollRegistry = new ScrollRegistry();
-  private rootRef = React.createRef<HTMLDivElement>();
   private unmounted = new ReplaySubject<void>(1);
 
   constructor(props: IRootOptions) {
     super(props);
-
-    instance.setServices({
-      elementStore: this.props.elementStore,
-      scrollRegistry: this.scrollRegistry,
-      stateContainer: this.stateContainer,
-    });
   }
 
-  public componentDidMount() {
-    const focus = new FocusService(
-      this.stateContainer,
-      this.rootRef.current!,
-      this.props.focus,
-      this.props.elementStore,
-      new ScrollExecutor(this.scrollRegistry, this.props.scrolling),
-    );
-    const input = new InputService(this.props.inputs);
-
-    input.events.pipe(takeUntil(this.unmounted)).subscribe(({ button, event }) => {
-      if (focus.sendButton(button) && event) {
-        event.preventDefault();
-      }
-    });
+  public componentDidUpdate(_: IRootOptions, prevState: IState) {
+    if (this.state.showChildren && !prevState.showChildren && this.focus) {
+      this.focus.setDefaultFocus();
+    }
   }
 
   public componentWillUnmount() {
@@ -96,8 +85,40 @@ class Root extends React.PureComponent<IRootOptions> {
   }
 
   public render() {
-    return <div ref={this.rootRef}>{this.props.children}</div>;
+    return <div ref={this.setRoot}>{this.state.showChildren && this.props.children}</div>;
   }
+
+  private readonly setRoot = (rootElement: HTMLDivElement | null) => {
+    if (!rootElement) {
+      return;
+    }
+
+    const root = new RootStore(rootElement);
+
+    instance.setServices({
+      elementStore: this.props.elementStore,
+      root,
+      scrollRegistry: this.scrollRegistry,
+      stateContainer: this.stateContainer,
+    });
+
+    const focus = (this.focus = new FocusService(
+      this.stateContainer,
+      root,
+      this.props.focus,
+      this.props.elementStore,
+      new ScrollExecutor(this.scrollRegistry, this.props.scrolling),
+    ));
+
+    const input = new InputService(this.props.inputs);
+    input.events.pipe(takeUntil(this.unmounted)).subscribe(({ button, event }) => {
+      if (focus.sendButton(button) && event) {
+        event.preventDefault();
+      }
+    });
+
+    this.setState({ showChildren: true });
+  };
 }
 
 /**

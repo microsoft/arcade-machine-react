@@ -1,4 +1,5 @@
 import { IElementStore } from './focus';
+import { RootStore } from './root-store';
 import { ScrollRegistry } from './scroll/scroll-registry';
 import { StateContainer } from './state/state-container';
 
@@ -6,6 +7,7 @@ import { StateContainer } from './state/state-container';
  * IArcServices is held in the ArcSingleton.
  */
 export interface IArcServices {
+  root: RootStore;
   elementStore: IElementStore;
   stateContainer: StateContainer;
   scrollRegistry: ScrollRegistry;
@@ -41,6 +43,7 @@ export class ArcSingleton {
 
     this.services = {
       elementStore: services.elementStore!,
+      root: services.root!,
       scrollRegistry: new ScrollRegistry(),
       stateContainer: new StateContainer(),
       ...services,
@@ -55,6 +58,13 @@ export class ArcSingleton {
       throw new Error('You cannot use arcade-machine functionality without an <ArcRoot />.');
     }
 
+    return this.services;
+  }
+
+  /**
+   * Returns the services, or void if none found.
+   */
+  public maybeGetServices(): IArcServices | void {
     return this.services;
   }
 }
